@@ -16,7 +16,9 @@ class Giles
   build : (dir, opts) ->
     console.log("building " + dir)
     #XXX TODO 
-    #
+    
+  ignore : (types) ->
+    console.log("types to ignore " + types)
 stylus = false
 coffee = false
 jade = false
@@ -43,8 +45,4 @@ giles.compile '.jade', '.html',  (file) ->
 
 giles.ignore [/node_modules/, /.git/]
 
-if require.main == module
-  #called as cli tool
-else
-  #required as module
-  module.exports = giles
+module.exports = giles
