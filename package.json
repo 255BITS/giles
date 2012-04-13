@@ -1,0 +1,33 @@
+{
+  "name": "giles",
+  "version": "0.1.0",
+  "author": "Martyn Garcia <martyn.garcia@gmail.com>",
+  "description": "a next-gen language watcher/compiler for pre-processed languages",
+  "bin": {
+    "giles": "bin/giles.bin.js"
+  },
+  "main": "giles",
+  "repository": {
+    "type":"git"
+  },
+  "keywords" : [
+    "cli",
+    "coffeescript",
+    "stylus",
+    "jade",
+    "html5",
+    "compiler",
+    "watcher"
+  ],
+  "dependencies" : {
+    "commander": "latest"
+  },
+  "devDependencies":{
+    "mocha" : "latest",
+    "should" : "latest"
+  },
+  "license":"MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}

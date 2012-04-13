@@ -1,3 +1,6 @@
+Into every generation a project is born.  One project in all the world, a Chosen One.  One born with the strength and skill
+to fight the vampires, to stop the spread of their evil and swell of their numbers.
+
 Giles wants you to stop writing HTML, CSS, and JS.  Whether you are working on
 a legacy app supporting ie6, a nodejs server, or you are writing the next hottest html5 app, giles can help.
 
