@@ -16,7 +16,7 @@ class Giles
       callback : callback,
       extension: target
     }
-    if typeof extensions is Array
+    if typeof extensions is 'object'
       @compilerMap[ext] = compiler for ext in extensions
     else
       @compilerMap[extensions] = compiler
@@ -28,6 +28,10 @@ class Giles
   ignore : (types) ->
     console.log("types to ignore " + types)
 
+
+  compile : (file) ->
+    result = @compileFile(file)
+    fs.writeFileSync result.outputFile, result.content, 'utf8'
 
   compileFile : (file) ->
     [prefix, ext] = @parseFileName(file)
