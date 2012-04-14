@@ -44,10 +44,6 @@ To build all assets recursively, outputting to a specific directory
 |  giles . -o build
 It will mimic your source directory tree structure, if you like trees.
 
-To build with local variables in a json file
-|  giles .  --json env/dev.json
-Use this to hold environment variables, constants, useful strings, whatever you'd like.
-
 To ignore a directory, or multiple(will match recursively)
 |  giles . --ignore vendor,bin
 

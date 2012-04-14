@@ -1,14 +1,13 @@
 fs = require 'fs'
-String.prototype.endsWith = (suffix) -> this.indexOf(suffix, this.length - suffix.length) != -1
+path = require 'path'
 class Giles 
   constructor : () ->
     @compilerMap = {}
 
   watch : (dir, opts) ->
-    console.log("Watching "+ dir)
-    fs.watch dir, {persistent:true}, (event, file) ->
-      console.log event
-      console.log file
+    console.log("watching #{dir}")
+    fs.watch dir, {persistent:true}, (event, file) =>
+      @compile(dir+'/'+file)
     #XXX TODO
     
   addCompiler : (extensions, target, callback) ->
@@ -31,6 +30,7 @@ class Giles
 
   compile : (file) ->
     result = @compileFile(file)
+    return unless result
     fs.writeFileSync result.outputFile, result.content, 'utf8'
 
   compileFile : (file) ->
@@ -38,6 +38,7 @@ class Giles
     compiler = @compilerMap[ext]
     return unless compiler
 
+    return unless path.existsSync(file)
     content = fs.readFileSync(file, 'utf8')
     output = @compilerMap[ext].callback(content)
 

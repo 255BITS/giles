@@ -35,3 +35,20 @@ describe 'building', () ->
     contents = fs.readFileSync(__dirname+'/test.test-giles-compiler-out', 'utf8')
     contents.length.should.equal(5)
 
+
+createFixture = (filename, content, done, callback)->
+  file = __dirname+"/"+filename
+  fs.writeFileSync(file, content, 'utf8')
+  setTimeout( () ->
+    callback()
+    fs.unlinkSync(file)
+    done()
+  , 100)
+
+describe 'watch', () ->
+  it 'should build a file when it has changed', (done) ->
+    giles.watch(__dirname+'/.', {})
+    origContent = 'this is a tmp file'
+    createFixture 'tmp.test-giles-compiler', origContent, done, () ->
+      content = fs.readFileSync(__dirname+'/tmp.test-giles-compiler-out', 'utf8')
+      content.should.equal(origContent.substr(0,5))
