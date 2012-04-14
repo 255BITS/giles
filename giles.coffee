@@ -1,13 +1,57 @@
 fs = require 'fs'
-path = require 'path'
+pathfs = require 'path'
 class Giles 
   constructor : () ->
     @compilerMap = {}
 
+  crawl : (dir, onDirectory, onFile) ->
+    handlePath = (path) =>
+      (err, stats) =>
+        if err
+          console.error(err)
+        else if stats.isFile()
+          onFile(path)
+        else if stats.isDirectory()
+          @crawl(path, onDirectory, onFile)
+        else
+          #wtf are we dealing with.  A device?!
+          console.error("Could not determine file "+filename)
+          console.error(stats)
+
+    fs.readdir dir, (err, files) =>
+      if err
+        console.error("cannot read dir")
+        console.error(err)
+      else
+        onDirectory(dir)
+        for file in files
+          path=dir+'/'+file
+          console.log("path is "+path)
+          fs.stat path, handlePath(path)
+
   watch : (dir, opts) ->
-    console.log("watching #{dir}")
-    fs.watch dir, {persistent:true}, (event, file) =>
-      @compile(dir+'/'+file)
+    onFile = (name) =>
+      console.log('compiling ' +name)
+      @compile(name)
+
+    onDirectory = (dir) =>
+      console.log("watch: " + dir)
+      fs.watch dir, {persistent:true}, (event, file) =>
+        path = dir+'/'+file
+        console.log 'event: ' + event + ' ' + file
+        fs.stat path, (err, stats) ->
+          if err
+            console.error(err)
+          else if stats.isDirectory()
+            onDirectory(path)
+          else if stats.isFile()
+            onFile(path)
+          else
+            #wtf are we dealing with.  A device?!
+            console.error("Could not determine file "+filename)
+            console.error(stats)
+
+    @crawl dir, onDirectory, onFile
     #XXX TODO
     
   addCompiler : (extensions, target, callback) ->
@@ -21,11 +65,9 @@ class Giles
       @compilerMap[extensions] = compiler
 
   build : (dir, opts) ->
-    console.log("building " + dir)
     #XXX TODO 
     
   ignore : (types) ->
-    console.log("types to ignore " + types)
 
 
   compile : (file) ->
@@ -38,7 +80,7 @@ class Giles
     compiler = @compilerMap[ext]
     return unless compiler
 
-    return unless path.existsSync(file)
+    return unless pathfs.existsSync(file)
     content = fs.readFileSync(file, 'utf8')
     output = @compilerMap[ext].callback(content)
 

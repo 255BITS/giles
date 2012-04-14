@@ -1,5 +1,6 @@
 giles = require('../giles')
 fs = require 'fs'
+path = require 'path'
 describe 'watch', () ->
   it 'should assert', () ->
     [1,2,3].indexOf(5).should.equal -1
@@ -38,6 +39,7 @@ describe 'building', () ->
 
 createFixture = (filename, content, done, callback)->
   file = __dirname+"/"+filename
+  console.log('creating fixture: '+ file)
   fs.writeFileSync(file, content, 'utf8')
   setTimeout( () ->
     callback()
@@ -45,10 +47,29 @@ createFixture = (filename, content, done, callback)->
     done()
   , 100)
 
+giles.watch(__dirname, {})
 describe 'watch', () ->
-  it 'should build a file when it has changed', (done) ->
-    giles.watch(__dirname+'/.', {})
+  #  it 'should build a file when it has changed', (done) ->
+  #    origContent = 'this is a tmp file'
+  #    createFixture 'tmp.test-giles-compiler', origContent, done, () ->
+  #      outfile = __dirname+'/tmp.test-giles-compiler-out'
+  #      content = fs.readFileSync(outfile, 'utf8')
+  #      content.should.equal(origContent.substr(0,5))
+  #      setTimeout(() ->
+  #        fs.unlinkSync(outfile)
+  #      ,0)
+
+  it 'should work with subdirs', (done) ->
     origContent = 'this is a tmp file'
-    createFixture 'tmp.test-giles-compiler', origContent, done, () ->
-      content = fs.readFileSync(__dirname+'/tmp.test-giles-compiler-out', 'utf8')
-      content.should.equal(origContent.substr(0,5))
+    fs.mkdirSync(__dirname+'/tmp')
+
+    setTimeout( () ->
+      createFixture 'tmp/tmp.test-giles-compiler', origContent, done, () ->
+        outfile = __dirname+'/tmp/tmp.test-giles-compiler-out'
+        content = fs.readFileSync(outfile, 'utf8')
+        content.should.equal(origContent.substr(0,5))
+        setTimeout(() ->
+          fs.unlinkSync(outfile)
+          fs.rmdirSync(__dirname+'/tmp')
+        ,0)
+    ,100)
