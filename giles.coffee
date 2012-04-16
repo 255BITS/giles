@@ -95,16 +95,26 @@ class Giles
     return unless compiler
 
     return unless pathfs.existsSync(file)
-    console.log('compiling ' +file+ ' to ' + prefix+compiler.extension);
+    outputFile = prefix+compiler.extension
+    console.log('compiling ' +file+ ' to ' + outputFile)
     content = fs.readFileSync(file, 'utf8')
+
+    outputContent = null
+    if pathfs.existsSync(outputFile)
+      outputContent = fs.readFileSync(outputFile, 'utf8')
+
     try
       compiler.callback content, file, (output) ->
-        cb( 
-          outputFile : prefix+compiler.extension,
-          content : output,
-          inputFile : file,
-          originalContent : content
-        )
+        if output == outputContent
+          console.log "no change in output, not writing " +outputFile
+          return
+
+          cb( 
+            outputFile : outputFile,
+            content : output,
+            inputFile : file,
+            originalContent : content
+          )
     catch error
       console.error(error)
       console.error("stack trace:")
