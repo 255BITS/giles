@@ -81,6 +81,6 @@ These examples are in coffeescript.
 
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
-#License
+###License
   Giles is available under the MIT license.  We hope you find it useful.  Please let us at 255 BITS know if you use it 
   for something cool.
