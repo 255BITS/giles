@@ -5,6 +5,9 @@ class Giles
     @compilerMap = {}
     @ignored = []
 
+  #Crawls a directory recursively
+  #calls onDirectory for every directory encountered
+  #calls onFile for every file encountered
   crawl : (dir, onDirectory, onFile) ->
     handlePath = (path) =>
       (err, stats) =>
@@ -29,6 +32,7 @@ class Giles
           path=dir+'/'+file
           fs.stat path, handlePath(path)
 
+  #Watches a directory recursively
   watch : (dir, opts) ->
     onFile = (name) =>
       @compile(name) unless @isIgnored(name)
@@ -53,6 +57,7 @@ class Giles
     @crawl dir, onDirectory, onFile
     #XXX TODO
     
+  #Adds a compiler.  See README.md for usage
   addCompiler : (extensions, target, callback) ->
     compiler = 
       callback : callback,
@@ -63,6 +68,7 @@ class Giles
     else
       @compilerMap[extensions] = compiler
 
+  #Builds a directory.  See README.md for usage
   build : (dir, opts) ->
     onFile = (name) =>
       @compile(name) unless @isIgnored(name)
@@ -71,15 +77,18 @@ class Giles
 
     @crawl dir, onDirectory, onFile
     
+  #Ignore an array of various directory names
   ignore : (types) ->
     @ignored = types
 
 
+  #Compiles a file and writes it out to disk
   compile : (file) ->
     result = @compileFile file, (result) ->
       return unless result
       fs.writeFileSync result.outputFile, result.content, 'utf8'
 
+  #Compiles a file and calls cb() with the result object
   compileFile : (file, cb) ->
     [prefix, ext] = @parseFileName(file)
     compiler = @compilerMap[ext]
@@ -96,7 +105,7 @@ class Giles
         originalContent : content
       )
 
-    return 
+  # Get the prefix and extension for a filename
   parseFileName : (file) ->
     index = file.lastIndexOf '.'
     if index == -1
@@ -104,9 +113,10 @@ class Giles
     else
       [file.substr(0,index), file.substr(index)]
 
+  # true if name contains an ignored directory
   isIgnored : (name) ->
     for ignore in @ignored
-      return true if ignore.test(name)
+      return true if ignore.test(name) #this matches really greedy
     return false
 
 
@@ -114,8 +124,11 @@ stylus = false
 coffee = false
 jade = false
 
+#create our export singleton to set up default values
 giles = new Giles()
 giles.locals = {}
+
+#Stylus compiler.  Nothing fancy
 giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
   stylus = require 'stylus' unless stylus
   stylus.render contents, {filename: filename}, (err, css) ->
@@ -125,14 +138,18 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
     else
       output(css)
 
+#coffeescript compiler
 giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, output) ->
   coffee = require 'coffee-script' unless coffee
   output(coffee.compile(contents, {}))
 
+#jade compiler
 giles.addCompiler '.jade', '.html',  (contents, filename, output) ->
   jade = require 'jade' unless jade
   output(jade.compile(contents, giles.locals)(giles.locals))
 
+#default ignores, may be overriden
 giles.ignore [/node_modules/, /.git/]
 
+#export the giles singleton
 module.exports = giles
