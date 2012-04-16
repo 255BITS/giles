@@ -3,6 +3,7 @@ pathfs = require 'path'
 class Giles 
   constructor : () ->
     @compilerMap = {}
+    @ignored = []
 
   crawl : (dir, onDirectory, onFile) ->
     handlePath = (path) =>
@@ -26,16 +27,14 @@ class Giles
         onDirectory(dir)
         for file in files
           path=dir+'/'+file
-          console.log("path is "+path)
           fs.stat path, handlePath(path)
 
   watch : (dir, opts) ->
     onFile = (name) =>
-      console.log('compiling ' +name)
-      @compile(name)
+      @compile(name) unless @isIgnored(name)
 
     onDirectory = (dir) =>
-      console.log("watch: " + dir)
+      return if @isIgnored(dir)
       fs.watch dir, {persistent:true}, (event, file) =>
         path = dir+'/'+file
         console.log 'event: ' + event + ' ' + file
@@ -55,19 +54,25 @@ class Giles
     #XXX TODO
     
   addCompiler : (extensions, target, callback) ->
-    compiler = {
+    compiler = 
       callback : callback,
       extension: target
-    }
+    
     if typeof extensions is 'object'
       @compilerMap[ext] = compiler for ext in extensions
     else
       @compilerMap[extensions] = compiler
 
   build : (dir, opts) ->
-    #XXX TODO 
+    onFile = (name) =>
+      @compile(name) unless @isIgnored(name)
+
+    onDirectory = () ->
+
+    @crawl dir, onDirectory, onFile
     
   ignore : (types) ->
+    @ignored = types
 
 
   compile : (file) ->
@@ -81,6 +86,7 @@ class Giles
     return unless compiler
 
     return unless pathfs.existsSync(file)
+    console.log('compiling ' +file)
     content = fs.readFileSync(file, 'utf8')
     output = @compilerMap[ext].callback(content)
 
@@ -97,6 +103,12 @@ class Giles
       [file, '']
     else
       [file.substr(0,index), file.substr(index)]
+
+  isIgnored : (name) ->
+    for ignore in @ignored
+      return true if ignore.test(name)
+    return false
+
 
 stylus = false
 coffee = false
