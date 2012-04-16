@@ -23,29 +23,23 @@ The goal of Giles is not to advocate a specific framework, rather to provide dev
 functionality in the languages of their choice.  With Giles' lazy-loading approach, it only forces you to include
 functionality that you actually use.
 
-To install run
-|  sudo npm install -g giles
+To install run `sudo npm install -g giles`
 npm is available by installing nodejs[LINK]
 
-To get help
-|  giles -h
+To get help `giles -h`
 If you ever need to run this, file a bug with me.
 
-To watch the current directory, recursively
-|  giles -w
-Watchers be watching.  Handles new files too.  It will work even if you re-arrange your whole project.
+To watch the current directory, recursively `giles -w`
+Handles new files too.  It will work even if you re-arrange your whole project.
 
-To watch a specific directory, recursively
-|  giles directory -w
+To watch a specific directory, recursively `giles directory -w`
 This compiles to the same directory as the asset.  Recommended: Start 
 by evaluating a .coffee on a vertical piece of functionality.
 
-To build all assets recursively, outputting to a specific directory
-|  giles . -o build
+To build all assets recursively, outputting to a specific directory `giles . -o build`
 It will mimic your source directory tree structure, if you like trees.
 
-To ignore a directory, or multiple(will match recursively)
-|  giles . --ignore vendor,bin
+To ignore a directory, or multiple(will match recursively) `giles . --ignore vendor,bin`
 
 Note, giles automatically ignores the following directories:
 *node_modules
@@ -57,13 +51,15 @@ Note, giles automatically ignores the following directories:
 These examples are in coffeescript.
 
 Building with .js and giles (works with Jake)
-|  srcDir = PATH_TO_SOURCE
-|  options = 
-|    #output : __dirname+"/build",#The directory to output to,
-|    #locals : {} #variables exposed to all compilers which support variables
-|  
-|  giles = require('giles')
-|  giles.build(srcDir, options)
+```coffeescript
+  srcDir = PATH_TO_SOURCE
+  options = 
+    #output : __dirname+"/build",#The directory to output to,
+    #locals : {} #variables exposed to all compilers which support variables
+  
+  giles = require('giles')
+  giles.build(srcDir, options)
+```
 
 
 To watch with giles using local variables
@@ -74,7 +70,7 @@ To watch with giles using local variables
 
 To add a compiler to giles
 For coffeescript
-```coffee-script
+```coffeescript
  coffee = false
  #executed for each .coffee or .cs file
  #if giles.watch is called, we call this function each time a file with the associated extension is changed/added
@@ -86,11 +82,12 @@ For coffeescript
 ```
 
 Or for jade
-| jade = false
-| giles.compile '.jade', '.html',  (file) ->
-|   jade = require 'jade' unless jade
-|   contents = fs.readFileSync(file, 'utf8')
-|   return jade.compile(contents, giles.locals)(giles.locals)
-
+```coffeescript
+ jade = false
+ giles.compile '.jade', '.html',  (file) ->
+   jade = require 'jade' unless jade
+   contents = fs.readFileSync(file, 'utf8')
+   return jade.compile(contents, giles.locals)(giles.locals)
+```
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
