@@ -8,10 +8,9 @@ Giles is a project watcher and builder for a variety of useful markup languages.
 nextgen web tools and increase project momentum.
 
 ##Giles supports
-  * (CoffeeScript)[http://coffeescript.org/] - Incredible javascript compiler.  Everything just seems to work better with coffeescript. 
-  * (Stylus)[https://github.com/LearnBoost/stylus] - Fantastic css compiler.  The variable/mixin support is extremely powerful.
-  * (Jade)[http://jade-lang.com/] - Cool HAML-like alternative to writing html.  Check out the example here[LINK].
-  try it here[LINK]
+  * [CoffeeScript](http://coffeescript.org/) - Incredible javascript compiler.  Everything just seems to work better with coffeescript. 
+  * [Stylus](https://github.com/LearnBoost/stylus) - Fantastic css compiler.  The variable/mixin support is extremely powerful.
+  * [Jade](http://jade-lang.com/) - Cool HAML-like alternative to writing html.
   * Your favorite language.  Add it and issue a pull request.
 
 ###Giles is a command line tool and API for:
@@ -23,7 +22,7 @@ functionality in the languages of their choice.
 
 ###To install run 
     sudo npm install -g giles
-_npm is available by installing nodejs[LINK]_
+_npm is available by installing [nodejs](http://nodejs.org)_
 
 ###To get help 
     giles -h
