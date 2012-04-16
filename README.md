@@ -23,31 +23,31 @@ The goal of Giles is not to advocate a specific framework, rather to provide dev
 functionality in the languages of their choice.  With Giles' lazy-loading approach, it only forces you to include
 functionality that you actually use.
 
-To install run 
+###To install run 
     sudo npm install -g giles
 npm is available by installing nodejs[LINK]
 
-To get help 
+###To get help 
     giles -h
 If you ever need to run this, file a bug with me.
 
-To watch the current directory, recursively 
+###To watch the current directory, recursively 
     giles -w
 Handles new files too.  It will work even if you re-arrange your whole project.
 
-To watch a specific directory, recursively 
+###To watch a specific directory, recursively 
     giles directory -w
 This compiles to the same directory as the asset.  Recommended: Start 
 by evaluating a .coffee on a vertical piece of functionality.
 
-To build all assets recursively, outputting to a specific directory 
+###To build all assets recursively, outputting to a specific directory 
     giles . -o build
 It will mimic your source directory tree structure, if you like trees.
 
-To ignore a directory, or multiple(will match recursively) 
+###To ignore a directory, or multiple(will match recursively) 
     giles . --ignore vendor,bin
 
-Note, giles automatically ignores the following directories:
+#####Note, giles automatically ignores the following directories:
   * node_modules
   * .git
 
