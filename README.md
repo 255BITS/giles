@@ -34,13 +34,12 @@ _Handles new files too.  It will work even if you re-arrange your whole project.
 
 ###To watch a specific directory, recursively 
     giles directory -w
-_This compiles to the same directory as the asset.  Recommended: Start 
-by evaluating a .coffee on a vertical piece of functionality._
-
+_This compiles to the same directory as the asset._
+<!--
 ###To build all assets recursively, outputting to a specific directory 
     giles . -o build
 _It will mimic your source directory tree structure, if you like trees._
-
+-->
 ###To ignore a directory, or multiple(will match recursively) 
     giles . --ignore vendor,bin
 _ignore defaults to node_modules,.git_
