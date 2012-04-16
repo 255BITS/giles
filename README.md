@@ -5,7 +5,7 @@ Giles wants you to stop writing HTML, CSS, and JS.  Whether you are working on
 a legacy app supporting ie6, a nodejs server, or you are writing the next hottest html5 app, giles can help.
 
 Giles is a project watcher and builder for a variety of useful markup languages.  Use Giles to develop with 
-nextgen web tools, and increase project momentum.
+nextgen web tools and increase project momentum.
 
 ##Giles supports
   * Jade[LINK TO JADE] - Great HAML-like alternative to writing html.  Check out the example here[LINK].
@@ -14,35 +14,33 @@ nextgen web tools, and increase project momentum.
   try it here[LINK]
   * Your favorite language.  Add it and issue a pull request.
 
-##Giles is a command line tool and API for:
+###Giles is a command line tool and API for:
 * Developing.  Watch a directory and build output files when source files change.
-* Releasing.  Building static assets for deployment to S3 or cloud providers(or for use in mobile frameworks)
-* Extremely lightweight client-side development.  Language/library agnostic.
+* Releasing.  Building static assets for deployment 
 
 The goal of Giles is not to advocate a specific framework, rather to provide developers and designers
-functionality in the languages of their choice.  With Giles' lazy-loading approach, it only forces you to include
-functionality that you actually use.
+functionality in the languages of their choice.
 
 ###To install run 
     sudo npm install -g giles
-npm is available by installing nodejs[LINK]
+___npm is available by installing nodejs[LINK]___
 
 ###To get help 
     giles -h
-If you ever need to run this, file a bug with me.
+_If you ever need to run this, file a bug with me._
 
 ###To watch the current directory, recursively 
     giles -w
-Handles new files too.  It will work even if you re-arrange your whole project.
+__Handles new files too.  It will work even if you re-arrange your whole project.__
 
 ###To watch a specific directory, recursively 
     giles directory -w
-This compiles to the same directory as the asset.  Recommended: Start 
-by evaluating a .coffee on a vertical piece of functionality.
+____This compiles to the same directory as the asset.  Recommended: Start 
+by evaluating a .coffee on a vertical piece of functionality.____
 
 ###To build all assets recursively, outputting to a specific directory 
     giles . -o build
-It will mimic your source directory tree structure, if you like trees.
+_It will mimic your source directory tree structure, if you like trees._
 
 ###To ignore a directory, or multiple(will match recursively) 
     giles . --ignore vendor,bin
@@ -50,7 +48,6 @@ It will mimic your source directory tree structure, if you like trees.
 #####Note, giles automatically ignores the following directories:
   * node_modules
   * .git
-
 
 
 #API
@@ -64,8 +61,6 @@ These examples are in coffeescript.
     
     giles = require('giles')
     giles.build(srcDir, options)
-
-
 
 ### To watch with giles using local variables
     giles = require('giles')
