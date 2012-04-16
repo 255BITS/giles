@@ -20,7 +20,10 @@
     "watcher"
   ],
   "dependencies" : {
-    "commander": "latest"
+    "commander": "latest",
+    "stylus": "latest",
+    "coffee-script": "latest",
+    "jade": "latest"
   },
   "devDependencies":{
     "mocha" : "latest",

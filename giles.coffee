@@ -37,7 +37,7 @@ class Giles
       return if @isIgnored(dir)
       fs.watch dir, {persistent:true}, (event, file) =>
         path = dir+'/'+file
-        console.log 'event: ' + event + ' ' + file
+        #console.log 'event: ' + event + ' ' + file
         fs.stat path, (err, stats) ->
           if err
             console.error(err)
@@ -76,27 +76,27 @@ class Giles
 
 
   compile : (file) ->
-    result = @compileFile(file)
-    return unless result
-    fs.writeFileSync result.outputFile, result.content, 'utf8'
+    result = @compileFile file, (result) ->
+      return unless result
+      fs.writeFileSync result.outputFile, result.content, 'utf8'
 
-  compileFile : (file) ->
+  compileFile : (file, cb) ->
     [prefix, ext] = @parseFileName(file)
     compiler = @compilerMap[ext]
     return unless compiler
 
     return unless pathfs.existsSync(file)
-    console.log('compiling ' +file)
+    console.log('compiling ' +file+ ' to ' + prefix+compiler.extension);
     content = fs.readFileSync(file, 'utf8')
-    output = @compilerMap[ext].callback(content)
+    compiler.callback content, file, (output) ->
+      cb( 
+        outputFile : prefix+compiler.extension,
+        content : output,
+        inputFile : file,
+        originalContent : content
+      )
 
-    return { 
-      outputFile : prefix+compiler.extension,
-      content : output,
-      inputFile : file,
-      originalContent : content
-    }
-
+    return 
   parseFileName : (file) ->
     index = file.lastIndexOf '.'
     if index == -1
@@ -116,20 +116,22 @@ jade = false
 
 giles = new Giles()
 giles.locals = {}
-giles.addCompiler [".styl", ".stylus"], '.css', (contents) ->
+giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
   stylus = require 'stylus' unless stylus
-  stylus.render contents, {filename: file}, (err, css) ->
+  stylus.render contents, {filename: filename}, (err, css) ->
     if err
-      console.error "Could not render stylus file: "+file
+      console.error "Could not render stylus file: "+filename
       console.error err
+    else
+      output(css)
 
-giles.addCompiler ['.coffee', '.cs'], '.js', (contents) ->
+giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, output) ->
   coffee = require 'coffee-script' unless coffee
-  coffee.compile contents, {}
+  output(coffee.compile(contents, {}))
 
-giles.addCompiler '.jade', '.html',  (contents) ->
+giles.addCompiler '.jade', '.html',  (contents, filename, output) ->
   jade = require 'jade' unless jade
-  jade.compile(contents, giles.locals)(giles.locals)
+  output(jade.compile(contents, giles.locals)(giles.locals))
 
 giles.ignore [/node_modules/, /.git/]
 

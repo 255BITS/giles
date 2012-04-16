@@ -11,7 +11,18 @@ commander.
 
 commander.parse(process.argv);
 
-commander.args.forEach(function(dir) {
+var args = commander.args;
+
+var cwd = process.cwd();
+if(args.length === 0) {
+  if(commander.watch)
+    console.log("No arguments(see --help), watching: "+cwd)
+  else
+    console.log("No arguments(see --help), building(-w to watch): "+cwd)
+  args = [cwd];
+}
+
+args.forEach(function(dir) {
   var opts = {};
   if(commander.ignore) {
     var args = commander.ignore.split(',');
@@ -28,3 +39,4 @@ commander.args.forEach(function(dir) {
     giles.build(dir, opts);
   }
 });
+
