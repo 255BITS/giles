@@ -67,19 +67,23 @@ Building with .js and giles (works with Jake)
 
 
 To watch with giles using local variables
-|  giles = require('giles')
-|  giles.watch(srcDir, options)
+```coffeescript
+  giles = require('giles')
+  giles.watch(srcDir, options)
+```
 
 To add a compiler to giles
 For coffeescript
-| coffee = false
-| #executed for each .coffee or .cs file
-| #if giles.watch is called, we call this function each time a file with the associated extension is changed/added
-| #if giles.build is called, we call this function once for each matching file
-| giles.compile ['.coffee', '.cs'], '.js', (file) ->
-|   coffee = require 'coffee-script' unless coffee
-|   contents = fs.readFileSync(file, 'utf8')
-|   return coffee.compile(contents, {}) #the processed result, as a utf-8 string
+```coffee-script
+ coffee = false
+ #executed for each .coffee or .cs file
+ #if giles.watch is called, we call this function each time a file with the associated extension is changed/added
+ #if giles.build is called, we call this function once for each matching file
+ giles.compile ['.coffee', '.cs'], '.js', (file) ->
+   coffee = require 'coffee-script' unless coffee
+   contents = fs.readFileSync(file, 'utf8')
+   return coffee.compile(contents, {}) #the processed result, as a utf-8 string
+```
 
 Or for jade
 | jade = false
