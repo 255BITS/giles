@@ -1,5 +1,5 @@
-___Into every generation a project is born.  One project in all the world, a Chosen One.  One born with the strength and skill
-to fight the vampires, to stop the spread of their evil and swell of their numbers.___
+_Into every generation a project is born.  One project in all the world, a Chosen One.  One born with the strength and skill
+to fight the vampires, to stop the spread of their evil and swell of their numbers._
 
 Giles wants you to stop writing HTML, CSS, and JS.  Whether you are working on
 a legacy app supporting ie6, a nodejs server, or you are writing the next hottest html5 app, giles can help.
@@ -23,7 +23,7 @@ functionality in the languages of their choice.
 
 ###To install run 
     sudo npm install -g giles
-___npm is available by installing nodejs[LINK]___
+_npm is available by installing nodejs[LINK]_
 
 ###To get help 
     giles -h
@@ -31,12 +31,12 @@ _If you ever need to run this, file a bug with me._
 
 ###To watch the current directory, recursively 
     giles -w
-__Handles new files too.  It will work even if you re-arrange your whole project.__
+_Handles new files too.  It will work even if you re-arrange your whole project._
 
 ###To watch a specific directory, recursively 
     giles directory -w
-____This compiles to the same directory as the asset.  Recommended: Start 
-by evaluating a .coffee on a vertical piece of functionality.____
+_This compiles to the same directory as the asset.  Recommended: Start 
+by evaluating a .coffee on a vertical piece of functionality._
 
 ###To build all assets recursively, outputting to a specific directory 
     giles . -o build
@@ -67,20 +67,22 @@ These examples are in coffeescript.
     giles.watch(srcDir, options)
 
 ### To add a compiler to giles
-   coffee = false
-   #executed for each .coffee or .cs file
-   #if giles.watch is called, we call this function each time a file with the associated extension is changed/added
-   #if giles.build is called, we call this function once for each matching file
-   giles.compile ['.coffee', '.cs'], '.js', (file) ->
-     coffee = require 'coffee-script' unless coffee
-     contents = fs.readFileSync(file, 'utf8')
-     return coffee.compile(contents, {}) #the processed result, as a utf-8 string
+    coffee = false
+    giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, output) ->
+      coffee = require 'coffee-script' unless coffee
+      output(coffee.compile(contents, {}))
 
-#### Or for jade
-   jade = false
-   giles.compile '.jade', '.html',  (file) ->
-     jade = require 'jade' unless jade
-     contents = fs.readFileSync(file, 'utf8')
-     return jade.compile(contents, giles.locals)(giles.locals)
+
+#### Or for stylus
+    giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
+    stylus = require 'stylus' unless stylus
+    stylus.render contents, {filename: filename}, (err, css) ->
+      if err
+        console.error "Could not render stylus file: "+filename
+        console.error err
+      else
+        output(css)
+
+
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
