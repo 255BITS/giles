@@ -97,13 +97,19 @@ class Giles
     return unless pathfs.existsSync(file)
     console.log('compiling ' +file+ ' to ' + prefix+compiler.extension);
     content = fs.readFileSync(file, 'utf8')
-    compiler.callback content, file, (output) ->
-      cb( 
-        outputFile : prefix+compiler.extension,
-        content : output,
-        inputFile : file,
-        originalContent : content
-      )
+    try
+      compiler.callback content, file, (output) ->
+        cb( 
+          outputFile : prefix+compiler.extension,
+          content : output,
+          inputFile : file,
+          originalContent : content
+        )
+    catch error
+      console.error(error)
+      console.error("stack trace:")
+      console.error(error.stack)
+
 
   # Get the prefix and extension for a filename
   parseFileName : (file) ->
