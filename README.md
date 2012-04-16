@@ -1,5 +1,5 @@
-Into every generation a project is born.  One project in all the world, a Chosen One.  One born with the strength and skill
-to fight the vampires, to stop the spread of their evil and swell of their numbers.
+___Into every generation a project is born.  One project in all the world, a Chosen One.  One born with the strength and skill
+to fight the vampires, to stop the spread of their evil and swell of their numbers.___
 
 Giles wants you to stop writing HTML, CSS, and JS.  Whether you are working on
 a legacy app supporting ie6, a nodejs server, or you are writing the next hottest html5 app, giles can help.
@@ -7,14 +7,14 @@ a legacy app supporting ie6, a nodejs server, or you are writing the next hottes
 Giles is a project watcher and builder for a variety of useful markup languages.  Use Giles to develop with 
 nextgen web tools, and increase project momentum.
 
-Giles supports
+##Giles supports
   * Jade[LINK TO JADE] - Great HAML-like alternative to writing html.  Check out the example here[LINK].
   * Stylus[LINK TO STYLUS] - Fantastic css compiler.  The variable/mixin support is extremely powerful.
   * CoffeeScript[LINK TO CS] - Incredible javascript compiler.  Everything just seems to work better with coffeescript. 
   try it here[LINK]
   * Your favorite language.  Add it and issue a pull request.
 
-Giles is a command line tool and API for:
+##Giles is a command line tool and API for:
 * Developing.  Watch a directory and build output files when source files change.
 * Releasing.  Building static assets for deployment to S3 or cloud providers(or for use in mobile frameworks)
 * Extremely lightweight client-side development.  Language/library agnostic.
@@ -53,7 +53,7 @@ Note, giles automatically ignores the following directories:
 
 
 
-=API=
+#API
 These examples are in coffeescript.
 
 ### Building with .js and giles (works with Jake)
