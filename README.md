@@ -8,9 +8,9 @@ Giles is a project watcher and builder for a variety of useful markup languages.
 nextgen web tools and increase project momentum.
 
 ##Giles supports
-  * Jade[LINK TO JADE] - Great HAML-like alternative to writing html.  Check out the example here[LINK].
-  * Stylus[LINK TO STYLUS] - Fantastic css compiler.  The variable/mixin support is extremely powerful.
-  * CoffeeScript[LINK TO CS] - Incredible javascript compiler.  Everything just seems to work better with coffeescript. 
+  * (CoffeeScript)[http://coffeescript.org/] - Incredible javascript compiler.  Everything just seems to work better with coffeescript. 
+  * (Stylus)[https://github.com/LearnBoost/stylus] - Fantastic css compiler.  The variable/mixin support is extremely powerful.
+  * (Jade)[http://jade-lang.com/] - Cool HAML-like alternative to writing html.  Check out the example here[LINK].
   try it here[LINK]
   * Your favorite language.  Add it and issue a pull request.
 
@@ -44,10 +44,7 @@ _It will mimic your source directory tree structure, if you like trees._
 
 ###To ignore a directory, or multiple(will match recursively) 
     giles . --ignore vendor,bin
-
-#####Note, giles automatically ignores the following directories:
-  * node_modules
-  * .git
+_ignore defaults to node_modules,.git_
 
 
 #API
