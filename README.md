@@ -51,7 +51,7 @@ Note, giles automatically ignores the following directories:
 These examples are in coffeescript.
 
 Building with .js and giles (works with Jake)
-```
+``
   srcDir = PATH_TO_SOURCE
   options = 
     #output : __dirname+"/build",#The directory to output to,
@@ -59,17 +59,17 @@ Building with .js and giles (works with Jake)
   
   giles = require('giles')
   giles.build(srcDir, options)
-```
+``
 
 
 To watch with giles using local variables
-```
+``
   giles = require('giles')
   giles.watch(srcDir, options)
-```
+``
 
 To add a compiler to giles
-```
+``
  coffee = false
  #executed for each .coffee or .cs file
  #if giles.watch is called, we call this function each time a file with the associated extension is changed/added
@@ -78,15 +78,15 @@ To add a compiler to giles
    coffee = require 'coffee-script' unless coffee
    contents = fs.readFileSync(file, 'utf8')
    return coffee.compile(contents, {}) #the processed result, as a utf-8 string
-```
+``
 
 Or for jade
-```coffeescript
+``
  jade = false
  giles.compile '.jade', '.html',  (file) ->
    jade = require 'jade' unless jade
    contents = fs.readFileSync(file, 'utf8')
    return jade.compile(contents, giles.locals)(giles.locals)
-```
+``
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
