@@ -2,7 +2,7 @@ _Into every generation a project is born.  One project in all the world, a Chose
 to fight the vampires, to stop the spread of their evil and swell of their numbers._
 
 Giles wants you to stop writing HTML, CSS, and JS.  Whether you are working on
-a legacy app supporting ie6, a nodejs server, or you are writing the next hottest html5 app, giles can help.
+a legacy app supporting ie6, a nodejs server, or you are writing the next hottest html5 app, this can help.
 
 Giles is a project watcher and builder for a variety of useful markup languages.  Use Giles to develop with 
 nextgen web tools and increase project momentum.
