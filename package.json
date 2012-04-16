@@ -8,7 +8,8 @@
   },
   "main": "giles",
   "repository": {
-    "type":"git"
+    "type":"git",
+    "url":"git://github.com/255BITS/giles.git"
   },
   "keywords" : [
     "cli",
