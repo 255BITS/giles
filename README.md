@@ -48,35 +48,35 @@ _ignore defaults to node_modules,.git_
 #API
 These examples are in coffeescript.
 
-### Building with .js and giles (works with Jake)
+### Building with .js and giles (works with Jake or Cake)
     srcDir = PATH_TO_SOURCE
-    options = 
-      #output : __dirname+"/build",#The directory to output to,
-      #locals : {} #variables exposed to all compilers which support variables
+    options = {}
     
     giles = require('giles')
     giles.build(srcDir, options)
 
 ### To watch with giles using local variables
+    srcDir = PATH_TO_SOURCE
+    options = {}
+
     giles = require('giles')
     giles.watch(srcDir, options)
 
 ### To add a compiler to giles
-    coffee = false
+    coffee = require 'coffee-script'
     giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, output) ->
-      coffee = require 'coffee-script' unless coffee
       output(coffee.compile(contents, {}))
 
 
 #### Or for stylus
+    stylus = require 'stylus'
     giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
-    stylus = require 'stylus' unless stylus
-    stylus.render contents, {filename: filename}, (err, css) ->
-      if err
-        console.error "Could not render stylus file: "+filename
-        console.error err
-      else
-        output(css)
+      stylus.render contents, {filename: filename}, (err, css) ->
+        if err
+          console.error "Could not render stylus file: "+filename
+          console.error err
+        else
+          output(css)
 
 
 **Both of these compilers are already in giles and listed here for illustration purposes.**
