@@ -9,6 +9,7 @@ class Giles
   #calls onDirectory for every directory encountered
   #calls onFile for every file encountered
   crawl : (dir, onDirectory, onFile) ->
+
     handlePath = (path) =>
       (err, stats) =>
         if err
@@ -34,9 +35,6 @@ class Giles
 
   #Watches a directory recursively
   watch : (dir, opts) ->
-    onFile = (name) =>
-      @compile(name) unless @isIgnored(name)
-
     onDirectory = (dir) =>
       return if @isIgnored(dir)
       fs.watch dir, {persistent:true}, (event, file) =>
@@ -54,8 +52,12 @@ class Giles
             console.error("Could not determine file "+filename)
             console.error(stats)
 
-    @crawl dir, onDirectory, onFile
-    #XXX TODO
+    #if 'dir' is a file, we watch it
+    ifFile = () =>
+      fs.watchFile dir, {persistent:true, interval: 50}, () =>
+        @compile(dir)
+
+    @process dir, onDirectory, ifFile
     
   #Adds a compiler.  See README.md for usage
   addCompiler : (extensions, target, callback) ->
@@ -68,14 +70,25 @@ class Giles
     else
       @compilerMap[extensions] = compiler
 
+
+  buildFile : (name) =>
+    @compile(name) unless @isIgnored(name)
+
+  process : (dir, onDirectory, ifFile) ->
+    stats = fs.statSync(dir)
+    if stats.isDirectory()
+      @crawl dir, onDirectory, @buildFile
+    else if stats.isFile()
+      @compile(dir)
+      ifFile() if ifFile
+    else
+      console.error(dir + " is not a directory or file")
+
   #Builds a directory.  See README.md for usage
   build : (dir, opts) ->
-    onFile = (name) =>
-      @compile(name) unless @isIgnored(name)
-
     onDirectory = () ->
 
-    @crawl dir, onDirectory, onFile
+    @process dir, onDirectory
     
   #Ignore an array of various directory names
   ignore : (types) ->
