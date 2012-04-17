@@ -1,5 +1,6 @@
 fs = require 'fs'
 pathfs = require 'path'
+log = require './log'
 class Giles 
   constructor : () ->
     @compilerMap = {}
@@ -13,20 +14,20 @@ class Giles
     handlePath = (path) =>
       (err, stats) =>
         if err
-          console.error(err)
+          log.error(err)
         else if stats.isFile()
           onFile(path)
         else if stats.isDirectory()
           @crawl(path, onDirectory, onFile)
         else
           #wtf are we dealing with.  A device?!
-          console.error("Could not determine file "+filename)
-          console.error(stats)
+          log.error("Could not determine file "+filename)
+          log.error(stats)
 
     fs.readdir dir, (err, files) =>
       if err
-        console.error("cannot read dir")
-        console.error(err)
+        log.error("cannot read dir")
+        log.error(err)
       else
         onDirectory(dir)
         for file in files
@@ -39,18 +40,17 @@ class Giles
       return if @isIgnored(dir)
       fs.watch dir, {persistent:true}, (event, file) =>
         path = dir+'/'+file
-        #console.log 'event: ' + event + ' ' + file
         fs.stat path, (err, stats) ->
           if err
-            console.error(err)
+            log.error(err)
           else if stats.isDirectory()
             onDirectory(path)
           else if stats.isFile()
             onFile(path)
           else
             #wtf are we dealing with.  A device?!
-            console.error("Could not determine file "+filename)
-            console.error(stats)
+            log.error("Could not determine file "+filename)
+            log.error(stats)
 
     #if 'dir' is a file, we watch it
     ifFile = () =>
@@ -82,7 +82,7 @@ class Giles
       @compile(dir)
       ifFile() if ifFile
     else
-      console.error(dir + " is not a directory or file")
+      log.error(dir + " is not a directory or file")
 
   #Builds a directory.  See README.md for usage
   build : (dir, opts) ->
@@ -100,6 +100,7 @@ class Giles
     result = @compileFile file, (result) ->
       return unless result
       fs.writeFileSync result.outputFile, result.content, 'utf8'
+      log.encourage()
 
   #Compiles a file and calls cb() with the result object
   compileFile : (file, cb) ->
@@ -109,7 +110,7 @@ class Giles
 
     return unless pathfs.existsSync(file)
     outputFile = prefix+compiler.extension
-    console.log('compiling ' +file+ ' to ' + outputFile)
+    log.notice('compiling ' +file+ ' to ' + outputFile)
     content = fs.readFileSync(file, 'utf8')
 
     outputContent = null
@@ -119,7 +120,7 @@ class Giles
     try
       compiler.callback content, file, (output) ->
         if output == outputContent
-          console.log "no change in output, not writing " +outputFile
+          log.notice "no change in output, not writing " +outputFile
           return
 
         cb( 
@@ -129,9 +130,9 @@ class Giles
           originalContent : content
         )
     catch error
-      console.error(error)
-      console.error("stack trace:")
-      console.error(error.stack)
+      log.error(error)
+      log.error("stack trace:")
+      log.error(error.stack)
 
 
   # Get the prefix and extension for a filename
@@ -162,8 +163,8 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
   stylus = require 'stylus' unless stylus
   stylus.render contents, {filename: filename}, (err, css) ->
     if err
-      console.error "Could not render stylus file: "+filename
-      console.error err
+      log.error "Could not render stylus file: "+filename
+      log.error err
     else
       output(css)
 

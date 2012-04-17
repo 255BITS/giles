@@ -24,7 +24,8 @@
     "commander": "latest",
     "stylus": "latest",
     "coffee-script": "latest",
-    "jade": "latest"
+    "jade": "latest",
+    "cli-color": "latest"
   },
   "devDependencies":{
     "mocha" : "latest",

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var commander = require('commander');
 var giles = require('../giles');
+var log = require('../log')
 var pathfs = require('path');
 
 commander.
@@ -17,9 +18,9 @@ var args = commander.args;
 var cwd = process.cwd();
 if(args.length === 0) {
   if(commander.watch)
-    console.log("No arguments(see --help), watching: "+cwd)
+    log.log("No arguments(see --help), watching: "+cwd)
   else
-    console.log("No arguments(see --help), building(-w to watch): "+cwd)
+    log.log("No arguments(see --help), building(-w to watch): "+cwd)
   args = [cwd];
 }
 
@@ -32,7 +33,7 @@ args.forEach(function(dir) {
     for(i=0;i<len;++i) {
       map.push(new RegExp(args[i]));
     }
-    console.log('ignoring ' + map);
+    log.log('ignoring ' + map);
     giles.ignore(map);
   }
   if(commander.watch) {
