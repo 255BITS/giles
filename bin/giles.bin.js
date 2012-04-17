@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-var commander = require('commander')
-var giles = require('../giles')
+var commander = require('commander');
+var giles = require('../giles');
+var pathfs = require('path');
 
 commander.
   usage('[directory] [options]').
@@ -23,6 +24,7 @@ if(args.length === 0) {
 }
 
 args.forEach(function(dir) {
+  dir = pathfs.resolve(cwd, dir);
   var opts = {};
   if(commander.ignore) {
     var args = commander.ignore.split(',');
