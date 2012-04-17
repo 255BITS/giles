@@ -55,7 +55,7 @@ These examples are in coffeescript.
     giles = require('giles')
     giles.build(srcDir, options)
 
-### To watch with giles using local variables
+### To watch with giles 
     srcDir = PATH_TO_SOURCE
     options = {}
 
