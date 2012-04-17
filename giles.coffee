@@ -122,12 +122,12 @@ class Giles
           console.log "no change in output, not writing " +outputFile
           return
 
-          cb( 
-            outputFile : outputFile,
-            content : output,
-            inputFile : file,
-            originalContent : content
-          )
+        cb( 
+          outputFile : outputFile,
+          content : output,
+          inputFile : file,
+          originalContent : content
+        )
     catch error
       console.error(error)
       console.error("stack trace:")
