@@ -46,7 +46,7 @@ class Giles
           else if stats.isDirectory()
             onDirectory(path)
           else if stats.isFile()
-            onFile(path)
+            @buildFile(path)
           else
             #wtf are we dealing with.  A device?!
             log.error("Could not determine file "+filename)
