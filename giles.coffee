@@ -110,7 +110,6 @@ class Giles
 
     return unless pathfs.existsSync(file)
     outputFile = prefix+compiler.extension
-    log.notice('compiling ' +file+ ' to ' + outputFile)
     content = fs.readFileSync(file, 'utf8')
 
     outputContent = null
@@ -120,9 +119,9 @@ class Giles
     try
       compiler.callback content, file, (output) ->
         if output == outputContent
-          log.notice "no change in output, not writing " +outputFile
           return
 
+        log.notice('compiling ' +file+ ' to ' + outputFile)
         cb( 
           outputFile : outputFile,
           content : output,
@@ -150,9 +149,7 @@ class Giles
     return false
 
 
-stylus = false
-coffee = false
-jade = false
+[stylus, coffee, iced, jade] = []
 
 #create our export singleton to set up default values
 giles = new Giles()
@@ -173,10 +170,15 @@ giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, output) ->
   coffee = require 'coffee-script' unless coffee
   output(coffee.compile(contents, {}))
 
+#iced-coffeescript compiler
+giles.addCompiler '.iced', '.js', (contents, filename, output) ->
+  iced = require 'iced-coffee-script' unless iced
+  output(iced.compile(contents))
+
 #jade compiler
 giles.addCompiler '.jade', '.html',  (contents, filename, output) ->
   jade = require 'jade' unless jade
-  output(jade.compile(contents, giles.locals)(giles.locals))
+  output(jade.compile(contents, {filename:filename})(giles.locals))
 
 #default ignores, may be overriden
 giles.ignore [/node_modules/, /.git/]
