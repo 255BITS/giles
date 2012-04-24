@@ -116,12 +116,18 @@ class Giles
     if pathfs.existsSync(outputFile)
       outputContent = fs.readFileSync(outputFile, 'utf8')
 
+    cwd = process.cwd()
     try
       compiler.callback content, file, (output) ->
         if output == outputContent
           return
 
-        log.notice('compiling ' +file+ ' to ' + outputFile)
+        #Output the relative file name in respect
+        #to the user's current directory
+        relFile = file.replace(cwd, ".")
+        relOutputFile = file.replace(cwd, ".")
+        log.notice('compiled ' +relFile+ ' to ' + relOutputFile)
+
         cb( 
           outputFile : outputFile,
           content : output,
@@ -131,7 +137,7 @@ class Giles
     catch error
       log.error(error)
       log.error("stack trace:")
-      log.error(error.stack)
+      log.error(error.stack.replace(cwd, "."))
 
 
   # Get the prefix and extension for a filename
