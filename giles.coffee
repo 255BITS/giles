@@ -40,7 +40,7 @@ class Giles
       return if @isIgnored(dir)
       fs.watch dir, {persistent:true}, (event, file) =>
         path = dir+'/'+file
-        fs.stat path, (err, stats) ->
+        fs.stat path, (err, stats) =>
           if err
             log.error(err)
           else if stats.isDirectory()
