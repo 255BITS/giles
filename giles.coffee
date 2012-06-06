@@ -192,7 +192,7 @@ giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
   jade = require 'jade' unless jade
   compileOpts = {}
   compileOpts.filename = filename
-  compileOpts.debug = true if options.development
+  compileOpts.pretty = true if options.development
   output(jade.compile(contents, compileOpts)(options))
 
 #default ignores, may be overriden
