@@ -9,7 +9,8 @@ commander.
 //  option('-o, --output-dir <dir>', 'The output directory').
   option('-i, --ignore <dir-list>', 'A comma delimited list of directories to ignore').
 //  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
-  option('-w, --watch', 'Watches the existing and new files for changes.  For development mode.');
+  option('-w, --watch', 'Watches the existing and new files for changes.  For development mode.').
+  option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.');
 
 commander.parse(process.argv);
 
@@ -36,6 +37,20 @@ args.forEach(function(dir) {
     log.log('ignoring ' + map);
     giles.ignore(map);
   }
+  if(commander.environment) {
+    if(commander.environment == 'dev' || commander.environment == 'development') {
+      giles.locals['environment']='development';
+      giles.locals['development']=true;
+    } else if(commander.environment == 'prod' || commander.environment == 'production') {
+      giles.locals['environment']='production';
+      giles.locals['production']=true;
+    }
+  } else {
+    log.log("Defaulting to 'development' environment.  Use -e prod for production.");
+    giles.locals['environment']='development';
+    giles.locals['development']=true;
+  }
+  giles.locals.cwd = dir;
   if(commander.watch) {
     giles.watch(dir, opts);
   } else {

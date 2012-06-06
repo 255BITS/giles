@@ -118,7 +118,7 @@ class Giles
       outputContent = fs.readFileSync(outputFile, 'utf8')
 
     try
-      compiler.callback content, file, (output) ->
+      compiler.callback content, file, @locals, (output) ->
         if output == outputContent
           log.notice "no change in output, not writing " +outputFile
           return
@@ -159,8 +159,14 @@ giles = new Giles()
 giles.locals = {}
 
 #Stylus compiler.  Nothing fancy
-giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
+giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, options, output) ->
   stylus = require 'stylus' unless stylus
+  styl = stylus(contents)
+  styl.set('filename', filename)
+  styl.include(options.cwd)
+  for key, val in options
+    styl.define(key, val)
+
   stylus.render contents, {filename: filename}, (err, css) ->
     if err
       log.error "Could not render stylus file: "+filename
@@ -169,14 +175,17 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
       output(css)
 
 #coffeescript compiler
-giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, output) ->
+giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, output) ->
   coffee = require 'coffee-script' unless coffee
-  output(coffee.compile(contents, {}))
+  output(coffee.compile(contents, options))
 
 #jade compiler
-giles.addCompiler '.jade', '.html',  (contents, filename, output) ->
+giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
   jade = require 'jade' unless jade
-  output(jade.compile(contents, giles.locals)(giles.locals))
+  compileOpts = {}
+  compileOpts.filename = filename
+  compileOpts.debug = true if options.development
+  output(jade.compile(contents, {})(options))
 
 #default ignores, may be overriden
 giles.ignore [/node_modules/, /.git/]
