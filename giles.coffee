@@ -40,13 +40,13 @@ class Giles
       return if @isIgnored(dir)
       fs.watch dir, {persistent:true}, (event, file) =>
         path = dir+'/'+file
-        fs.stat path, (err, stats) ->
+        fs.stat path, (err, stats) =>
           if err
             log.error(err)
           else if stats.isDirectory()
             onDirectory(path)
           else if stats.isFile()
-            onFile(path)
+            @buildFile(path)
           else
             #wtf are we dealing with.  A device?!
             log.error("Could not determine file "+filename)
@@ -110,18 +110,23 @@ class Giles
 
     return unless pathfs.existsSync(file)
     outputFile = prefix+compiler.extension
-    log.notice('compiling ' +file+ ' to ' + outputFile)
     content = fs.readFileSync(file, 'utf8')
 
     outputContent = null
     if pathfs.existsSync(outputFile)
       outputContent = fs.readFileSync(outputFile, 'utf8')
 
+    cwd = process.cwd()
     try
       compiler.callback content, file, @locals, (output) ->
         if output == outputContent
-          log.notice "no change in output, not writing " +outputFile
           return
+
+        #Output the relative file name in respect
+        #to the user's current directory
+        relFile = file.replace(cwd, ".")
+        relOutputFile = file.replace(cwd, ".")
+        log.notice('compiled ' +relFile+ ' to ' + relOutputFile)
 
         cb( 
           outputFile : outputFile,
@@ -132,7 +137,7 @@ class Giles
     catch error
       log.error(error)
       log.error("stack trace:")
-      log.error(error.stack)
+      log.error(error.stack.replace(cwd, "."))
 
 
   # Get the prefix and extension for a filename
@@ -150,9 +155,7 @@ class Giles
     return false
 
 
-stylus = false
-coffee = false
-jade = false
+[stylus, coffee, iced, jade] = []
 
 #create our export singleton to set up default values
 giles = new Giles()
@@ -179,13 +182,18 @@ giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, outpu
   coffee = require 'coffee-script' unless coffee
   output(coffee.compile(contents, options))
 
+#iced-coffeescript compiler
+giles.addCompiler '.iced', '.js', (contents, filename, output) ->
+  iced = require 'iced-coffee-script' unless iced
+  output(iced.compile(contents))
+
 #jade compiler
 giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
   jade = require 'jade' unless jade
   compileOpts = {}
   compileOpts.filename = filename
   compileOpts.debug = true if options.development
-  output(jade.compile(contents, {})(options))
+  output(jade.compile(contents, compileOpts)(options))
 
 #default ignores, may be overriden
 giles.ignore [/node_modules/, /.git/]
