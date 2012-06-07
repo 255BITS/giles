@@ -41,13 +41,16 @@ args.forEach(function(dir) {
     if(commander.environment == 'dev' || commander.environment == 'development') {
       giles.locals['environment']='development';
       giles.locals['development']=true;
+      giles.locals['production']=false;
     } else if(commander.environment == 'prod' || commander.environment == 'production') {
       giles.locals['environment']='production';
+      giles.locals['development']=false;
       giles.locals['production']=true;
     }
   } else {
     log.log("Defaulting to 'development' environment.  Use -e prod for production.");
     giles.locals['environment']='development';
+    giles.locals['production']=false;
     giles.locals['development']=true;
   }
   giles.locals.cwd = dir;
