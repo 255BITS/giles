@@ -1,6 +1,6 @@
 {
   "name": "giles",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Martyn Garcia <martyn.garcia@gmail.com>",
   "description": "a next-gen language watcher/compiler for pre-processed languages",
   "bin": {
