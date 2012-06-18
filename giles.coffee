@@ -6,18 +6,25 @@ connect = require 'connect'
 class Giles 
   constructor : () ->
     @compilerMap = {}
+    @reverseCompilerMap = {}
     @ignored = []
 
   server : (dir, opts) ->
     @app = connect().use (req, res) =>
       [file,args] = (dir+req.url).split("?")
       log.log("serving file: " + file)
-      @compile(file)
+      @compile(@reverseLookup(dir, file))
       res.end(fs.readFileSync(file, 'utf8'))
 
       console.log(dir+req.url)
     @app.listen(3999)
     log.log("Giles is watching on port 3999 ")
+
+  reverseLookup : (dir, file) ->
+    [name, ext] = file.split('.')
+    ext = extension for extension in @reverseCompilerMap[ext] if @reverseCompilerMap[ext]
+    name+"."+ext
+
   #Crawls a directory recursively
   #calls onDirectory for every directory encountered
   #calls onFile for every file encountered
@@ -79,8 +86,12 @@ class Giles
     
     if typeof extensions is 'object'
       @compilerMap[ext] = compiler for ext in extensions
+      @reverseCompilerMap[compiler] ?= []
+      @reverseCompilerMap[compiler].push ext for ext in extensions
     else
       @compilerMap[extensions] = compiler
+      @reverseCompilerMap[compiler] ?= []
+      @reverseCompilerMap[compiler].push extensions
 
 
   buildFile : (name) =>
@@ -197,7 +208,7 @@ giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, outpu
 #iced-coffeescript compiler
 giles.addCompiler '.iced', '.js', (contents, filename, output) ->
   iced = require 'iced-coffee-script' unless iced
-  output(iced.compile(contents))
+  output(iced.compile(contents, options))
 
 #jade compiler
 giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
