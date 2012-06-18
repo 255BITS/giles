@@ -6,7 +6,10 @@ module.exports =
     console.log(clc.yellow.bold("[WARN  ] ", more)+message)
   notice: (message, more...) ->
     console.log(clc.cyan.bold("[NOTICE] ", more)+message)
+  info: (message, more...) ->
+    console.log(clc.cyan.bold("[INFO  ] ", more)+message)
   log: (message, more...) ->
     console.log(message, more)
   encourage: () ->
     console.log(clc.blue("  That's quite good, what you've done."))
+

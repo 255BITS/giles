@@ -18,7 +18,8 @@
     "jade",
     "html5",
     "compiler",
-    "watcher"
+    "watcher",
+    "server"
   ],
   "dependencies" : {
     "commander": "latest",
@@ -26,7 +27,8 @@
     "coffee-script": "latest",
     "jade": "latest",
     "cli-color": "latest",
-    "iced-coffee-script": "latest"
+    "iced-coffee-script": "latest",
+    "connect" : "latest"
   },
   "devDependencies":{
     "mocha" : "latest",

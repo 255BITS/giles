@@ -10,7 +10,8 @@ commander.
   option('-i, --ignore <dir-list>', 'A comma delimited list of directories to ignore').
 //  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
   option('-w, --watch', 'Watches the existing and new files for changes.  For development mode.').
-  option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.');
+  option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.').
+  option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999');
 
 commander.parse(process.argv);
 
@@ -42,10 +43,12 @@ args.forEach(function(dir) {
       giles.locals['environment']='development';
       giles.locals['development']=true;
       giles.locals['production']=false;
+      log.log("Environment set to development");
     } else if(commander.environment == 'prod' || commander.environment == 'production') {
       giles.locals['environment']='production';
       giles.locals['development']=false;
       giles.locals['production']=true;
+      log.log("Environment set to production.")
     }
   } else {
     log.log("Defaulting to 'development' environment.  Use -e prod for production.");
@@ -54,7 +57,9 @@ args.forEach(function(dir) {
     giles.locals['development']=true;
   }
   giles.locals.cwd = dir;
-  if(commander.watch) {
+  if(commander.server) {
+    giles.server(dir, opts);
+  } else if(commander.watch) {
     giles.watch(dir, opts);
   } else {
     giles.build(dir, opts);

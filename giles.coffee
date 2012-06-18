@@ -1,11 +1,23 @@
 fs = require 'fs'
 pathfs = require 'path'
 log = require './log'
+connect = require 'connect'
+
 class Giles 
   constructor : () ->
     @compilerMap = {}
     @ignored = []
 
+  server : (dir, opts) ->
+    @app = connect().use (req, res) =>
+      [file,args] = (dir+req.url).split("?")
+      log.log("serving file: " + file)
+      @compile(file)
+      res.end(fs.readFileSync(file, 'utf8'))
+
+      console.log(dir+req.url)
+    @app.listen(3999)
+    log.log("Giles is watching on port 3999 ")
   #Crawls a directory recursively
   #calls onDirectory for every directory encountered
   #calls onFile for every file encountered
