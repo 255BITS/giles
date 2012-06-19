@@ -19,8 +19,8 @@ class Giles
         res.end(fs.readFileSync(file, 'utf8'))
       else
         next()
-    ).use(connect.static(dir)).listen(255255)
-    log.log("Giles is watching on port 255255 ")
+    ).use(connect.static(dir)).listen(2255)
+    log.log("Giles is watching on port 2255 ")
 
   reverseLookup : (file) ->
     [name, ext] = file.split('.')
