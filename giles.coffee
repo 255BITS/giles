@@ -24,8 +24,6 @@ class Giles
 
   reverseLookup : (file) ->
     [all, name, ext] = file.match(/(.*)\.(\w+)/)
-    console.log("PARSED : '" + name+"' / '" + ext + "'")
-    console.log("FROM " + file )
     ext = "."+ext
 
     numberFound = 0
