@@ -19,17 +19,18 @@ class Giles
         res.end(fs.readFileSync(file, 'utf8'))
       else
         next()
-    ).use(connect.static(dir)).listen(3999)
-    log.log("Giles is watching on port 3999 ")
+    ).use(connect.static(dir)).listen(255255)
+    log.log("Giles is watching on port 255255 ")
 
   reverseLookup : (file) ->
     [name, ext] = file.split('.')
 
     numberFound = 0
-    for extension in @reverseCompilerMap[ext] if @reverseCompilerMap[ext]
-      if(pathfs.existsSync(name+"."+newExt))
-        newExt = extension 
-        numberFound += 1
+    if @reverseCompilerMap[ext]
+      for extension in @reverseCompilerMap[ext] 
+        if(pathfs.existsSync(name+"."+newExt))
+          newExt = extension 
+          numberFound += 1
     
     if numberFound > 1
       throw "You can only have one file that can compile into #{file} - you have #{numberFound} - #{@reverseCompilerMap[ext]}"
