@@ -10,20 +10,33 @@ class Giles
     @ignored = []
 
   server : (dir, opts) ->
-    @app = connect().use (req, res) =>
+    @app = connect().use((req, res, next) =>
       [file,args] = (dir+req.url).split("?")
       log.log("serving file: " + file)
-      @compile(@reverseLookup(dir, file))
-      res.end(fs.readFileSync(file, 'utf8'))
-
-      console.log(dir+req.url)
-    @app.listen(3999)
+      file = @reverseLookup(file)
+      if(file)
+        @compile(file)
+        res.end(fs.readFileSync(file, 'utf8'))
+      else
+        next()
+    ).use(connect.static(dir)).listen(3999)
     log.log("Giles is watching on port 3999 ")
 
-  reverseLookup : (dir, file) ->
+  reverseLookup : (file) ->
     [name, ext] = file.split('.')
-    ext = extension for extension in @reverseCompilerMap[ext] if @reverseCompilerMap[ext]
-    name+"."+ext
+
+    numberFound = 0
+    for extension in @reverseCompilerMap[ext] if @reverseCompilerMap[ext]
+      if(pathfs.existsSync(name+"."+newExt))
+        newExt = extension 
+        numberFound += 1
+    
+    if numberFound > 1
+      throw "You can only have one file that can compile into #{file} - you have #{numberFound} - #{@reverseCompilerMap[ext]}"
+    else if numberFound == 0
+      return null
+
+    foundFile = name+"."+newExt
 
   #Crawls a directory recursively
   #calls onDirectory for every directory encountered
@@ -86,12 +99,12 @@ class Giles
     
     if typeof extensions is 'object'
       @compilerMap[ext] = compiler for ext in extensions
-      @reverseCompilerMap[compiler] ?= []
-      @reverseCompilerMap[compiler].push ext for ext in extensions
+      @reverseCompilerMap[target] = [] unless @reverseCompilerMap[target]
+      @reverseCompilerMap[target].push ext for ext in extensions
     else
       @compilerMap[extensions] = compiler
-      @reverseCompilerMap[compiler] ?= []
-      @reverseCompilerMap[compiler].push extensions
+      @reverseCompilerMap[target] = [] unless @reverseCompilerMap[target]
+      @reverseCompilerMap[target].push extensions
 
 
   buildFile : (name) =>

@@ -22,7 +22,7 @@ if(args.length === 0) {
   if(commander.watch)
     log.log("No arguments(see --help), watching: "+cwd)
   else
-    log.log("No arguments(see --help), building(-w to watch): "+cwd)
+    log.log("No arguments(see --help), building(-w to watch, -s to serve): "+cwd)
   args = [cwd];
 }
 
