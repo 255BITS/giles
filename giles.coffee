@@ -11,24 +11,27 @@ class Giles
 
   server : (dir, opts) ->
     @app = connect().use((req, res, next) =>
-      [file,args] = (dir+req.url).split("?")
-      log.log("serving file: " + file)
-      file = @reverseLookup(file)
+      [requestedFile,args] = (dir+req.url).split("?")
+      file = @reverseLookup(requestedFile)
       if(file)
+        log.log("Compiling: " + file)
         @compile(file)
-        res.end(fs.readFileSync(file, 'utf8'))
+        next()
       else
         next()
     ).use(connect.static(dir)).listen(2255)
     log.log("Giles is watching on port 2255 ")
 
   reverseLookup : (file) ->
-    [name, ext] = file.split('.')
+    [all, name, ext] = file.match(/(.*)\.(\w+)/)
+    console.log("PARSED : '" + name+"' / '" + ext + "'")
+    console.log("FROM " + file )
+    ext = "."+ext
 
     numberFound = 0
     if @reverseCompilerMap[ext]
       for extension in @reverseCompilerMap[ext] 
-        if(pathfs.existsSync(name+"."+newExt))
+        if(pathfs.existsSync(name+extension))
           newExt = extension 
           numberFound += 1
     
@@ -37,7 +40,7 @@ class Giles
     else if numberFound == 0
       return null
 
-    foundFile = name+"."+newExt
+    foundFile = name+newExt
 
   #Crawls a directory recursively
   #calls onDirectory for every directory encountered
