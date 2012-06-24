@@ -61,9 +61,16 @@ These examples are in coffeescript.
     giles.watch(srcDir, options)
 -->
 
+### To build static assets, recursively
+    giles
+
+_It will build every file into the same directory(views/index.jade will become views/index.html)_
+
 ### To run the giles server
     giles = require('giles')
     giles.server(dir, {port : 12345})
+
+_Try it for a lightweight development mode_
 
 ### To use giles connect/express module
     connect.use(giles.connect(srcDir))
