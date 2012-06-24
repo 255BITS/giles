@@ -74,8 +74,25 @@ _Try it for a lightweight development mode_
 
 ### To use giles connect/express module
     connect.use(giles.connect(srcDir))
-  
+
 _It is imperative that you place this before `connect.static'_
+  
+### Adding a custom route
+_By default giles creates a 1-1 map of template to generated page.  This allows you to use the same jade file with separate variables
+ to generate a dynamic page that is built into a finite amount of static targets._
+
+    #This generates static files with the output file dynamicPage.html
+    #locals is a list of variables available
+    #to the .jade file when running this action
+    locals = { name : "Martyn"}
+    
+    giles.get '/dynamicPage.html', 'page.jade', locals
+    
+_Then in page.jade_
+    
+    !!!
+    head
+      title = name
 
 ### To add a compiler to giles
     coffee = require 'coffee-script'
@@ -92,11 +109,11 @@ _It is imperative that you place this before `connect.static'_
         else
           output(css)
 
-
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
 #Changelog
 ### v0.5.0
+* Added `giles.get("/route", sourceFile, locals)` for defining generated files
 * Added -s option which tells giles to start a webserver on port 2255
 * Added -p option to specify port of -s
 * Removed -w option, -s works better and more consistently

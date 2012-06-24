@@ -34,7 +34,6 @@ describe 'building', () ->
     contents = fs.readFileSync(__dirname+'/test.test-giles-compiler-out', 'utf8')
     contents.length.should.equal(5)
 
-
 createFixture = (filename, content, done, callback)->
   file = __dirname+"/"+filename
   console.log('creating fixture: '+ file)

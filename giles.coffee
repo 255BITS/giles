@@ -9,28 +9,50 @@ class Giles
     @reverseCompilerMap = {}
     @ignored = []
     @locals = {}
+    @routes = {}
 
   #the connect module for giles, to use it do
   #express.use(giles.connect(assetDirectory))
   connect : (dir) =>
     (req, res, next) =>
-      [requestedFile,args] = (dir+req.url).split("?")
-      file = @reverseLookup(requestedFile)
+      [route, args] = req.url.split('?')
+      locals = {}
+      locals[key]=value for key,value in @locals
+
+      # Check for user defined route first
+      if @routes[route]
+        file = @routes[route].source
+        #Load in any custom locals
+        dynLocals = @routes[route].locals
+        if dynLocals
+          for key, value of dynLocals
+            locals[key] = value
+      else
+        #Otherwise look for 1-1 file mappings
+        [fullFilePath,args] = (dir+route).split("?")
+        file = @reverseLookup(fullFilePath)
+
+      
       if(file)
-        log.log("Compiling: " + file)
-        @compileFile file, @locals, (result) ->
+        @compileFile file, locals, (result) ->
           res.end result.content
       else
         next()
 
+  connectUserRoutes : (req, res, next) ->
+
+  get : (endpoint, source, locals) ->
+    @routes[endpoint]={source: source, locals:locals}
+
   server : (dir, opts) ->
     port = opts['port'] || 2255
-    @app = connect().use(@connect(dir)).use(connect.static(dir)).listen(port)
+    @app = connect().use(@connect(dir))
+      .use(connect.static(dir))
+      .listen(port)
     log.log("Giles is watching on port "+port)
 
   reverseLookup : (file) ->
     [name, ext] = @parseFileName(file)
-    ext = "."+ext
     pwd = pathfs.resolve(".")
     relativeName = pathfs.relative(pwd, name)
 
