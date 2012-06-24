@@ -11,36 +11,40 @@ class Giles
     @locals = {}
     @routes = {}
 
+
+  extendLocals : (dynLocals) ->
+    locals = {}
+    for key,value of @locals
+      locals[key]=value 
+    for key, value of dynLocals
+      locals[key] = value
+    return locals
+
   #the connect module for giles, to use it do
   #express.use(giles.connect(assetDirectory))
   connect : (dir) =>
     (req, res, next) =>
       [route, args] = req.url.split('?')
-      locals = {}
-      locals[key]=value for key,value in @locals
+      locals = @locals
 
       # Check for user defined route first
       if @routes[route]
         file = @routes[route].source
         #Load in any custom locals
         dynLocals = @routes[route].locals
-        if dynLocals
-          for key, value of dynLocals
-            locals[key] = value
+        locals = @extendLocals(dynLocals) if dynLocals
       else
         #Otherwise look for 1-1 file mappings
         [fullFilePath,args] = (dir+route).split("?")
         file = @reverseLookup(fullFilePath)
 
-      
       if(file)
         @compileFile file, locals, (result) ->
           res.end result.content
       else
         next()
 
-  connectUserRoutes : (req, res, next) ->
-
+  #adds an endpoint to the list of generated files
   get : (endpoint, source, locals) ->
     @routes[endpoint]={source: source, locals:locals}
 
@@ -72,7 +76,7 @@ class Giles
   #Crawls a directory recursively
   #calls onDirectory for every directory encountered
   #calls onFile for every file encountered
-  crawl : (dir, onDirectory, onFile) ->
+  crawl : (dir, onFile) ->
 
     handlePath = (path) =>
       (err, stats) =>
@@ -81,7 +85,7 @@ class Giles
         else if stats.isFile()
           onFile(path)
         else if stats.isDirectory()
-          @crawl(path, onDirectory, onFile)
+          @crawl(path, onFile)
         else
           #wtf are we dealing with.  A device?!
           log.error("Could not determine file "+filename)
@@ -92,7 +96,6 @@ class Giles
         log.error("cannot read dir")
         log.error(err)
       else
-        onDirectory(dir)
         for file in files
           path=dir+'/'+file
           fs.stat path, handlePath(path)
@@ -116,10 +119,10 @@ class Giles
   buildFile : (name) =>
     @compile(name) unless @isIgnored(name)
 
-  process : (dir, onDirectory, ifFile) ->
+  process : (dir, ifFile) ->
     stats = fs.statSync(dir)
     if stats.isDirectory()
-      @crawl dir, onDirectory, @buildFile
+      @crawl dir, @buildFile
     else if stats.isFile()
       @compile(dir)
       ifFile() if ifFile
@@ -128,10 +131,15 @@ class Giles
 
   #Builds a directory.  See README.md for usage
   build : (dir, opts) ->
-    onDirectory = () ->
+    @process dir
+    for route, opts of @routes
+      source = opts.source
+      locals = @locals
+      locals = @extendLocals(opts.locals) if opts.locals
+      console.log "building #{route} with "
+      console.log locals
+      @compile source, route, locals
 
-    @process dir, onDirectory
-    
   #Ignore an array of various directory names
   ignore : (types) ->
     @ignored = types
