@@ -68,7 +68,7 @@ These examples are in coffeescript.
 ### To use giles connect/express module
     connect.use(giles.connect(srcDir))
   
-    _It is imperative that you place this before `connect.static'_
+_It is imperative that you place this before `connect.static'_
 
 ### To add a compiler to giles
     coffee = require 'coffee-script'
@@ -88,8 +88,8 @@ These examples are in coffeescript.
 
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
-###Changelog
-  v0.5.0
+#Changelog
+### v0.5.0
   *Added -s option which tells giles to start a webserver on port 2255
   *Added -p option to specify port of -s
   *Removed -w option, -s works better and more consistently
