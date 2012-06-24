@@ -20,6 +20,11 @@ functionality in the languages of their choice.
     sudo npm install -g giles
 _npm is available by installing [nodejs](http://nodejs.org)_
 
+### To build static assets, recursively
+    giles
+
+_It will build every file into the same directory(views/index.jade will become views/index.html)_
+
 ###To get help 
     giles -h
 _If you ever need to run this, file a bug with me._
@@ -61,11 +66,6 @@ These examples are in coffeescript.
     giles.watch(srcDir, options)
 -->
 
-### To build static assets, recursively
-    giles
-
-_It will build every file into the same directory(views/index.jade will become views/index.html)_
-
 ### To run the giles server
     giles = require('giles')
     giles.server(dir, {port : 12345})
@@ -78,8 +78,8 @@ _Try it for a lightweight development mode_
 _It is imperative that you place this before `connect.static'_
   
 ### Adding a custom route
-_By default giles creates a 1-1 map of template to generated page.  This allows you to use the same jade file with separate variables
- to generate a dynamic page that is built into a finite amount of static targets._
+By default giles creates a 1-1 map of template to generated page.  This allows you to use the same jade file with separate variables
+to generate a dynamic page that is built into a finite amount of static targets.
 
     #This generates static files with the output file dynamicPage.html
     #locals is a list of variables available
