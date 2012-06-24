@@ -1,5 +1,5 @@
 fs = require 'fs'
-pathfs = require 'path'
+path = require 'path'
 log = require './log'
 connect = require 'connect'
 
@@ -26,6 +26,7 @@ class Giles
     (req, res, next) =>
       [route, args] = req.url.split('?')
       locals = @locals
+      route = '/index.html' if(route == '/')
 
       # Check for user defined route first
       if @routes[route]
@@ -39,7 +40,7 @@ class Giles
         file = @reverseLookup(fullFilePath)
 
       if(file)
-        @compileFile file, locals, (result) ->
+        @compileFile file, locals, {}, (result) ->
           res.end result.content
       else
         next()
@@ -53,18 +54,18 @@ class Giles
     @app = connect().use(@connect(dir))
       .use(connect.static(dir))
       .listen(port)
-    log.log("Giles is watching on port "+port)
+    log.notice("Giles is watching on port "+port)
 
   reverseLookup : (file) ->
     [name, ext] = @parseFileName(file)
-    pwd = pathfs.resolve(".")
-    relativeName = pathfs.relative(pwd, name)
+    pwd = process.cwd()
+    relativeName = path.relative(pwd, name)
 
     numberFound = 0
     foundFile = null
     if @reverseCompilerMap[ext]
       for extension in @reverseCompilerMap[ext] 
-        if(pathfs.existsSync(name+extension))
+        if(path.existsSync(name+extension))
           foundFile = name+extension
           numberFound += 1
     
@@ -78,14 +79,14 @@ class Giles
   #calls onFile for every file encountered
   crawl : (dir, onFile) ->
 
-    handlePath = (path) =>
+    handlePath = (resource) =>
       (err, stats) =>
         if err
           log.error(err)
         else if stats.isFile()
-          onFile(path)
+          onFile(resource)
         else if stats.isDirectory()
-          @crawl(path, onFile)
+          @crawl(resource, onFile)
         else
           #wtf are we dealing with.  A device?!
           log.error("Could not determine file "+filename)
@@ -97,8 +98,8 @@ class Giles
         log.error(err)
       else
         for file in files
-          path=dir+'/'+file
-          fs.stat path, handlePath(path)
+          resource=dir+'/'+file
+          fs.stat resource, handlePath(resource)
 
   #Adds a compiler.  See README.md for usage
   addCompiler : (extensions, target, callback) ->
@@ -131,27 +132,35 @@ class Giles
 
   #Builds a directory.  See README.md for usage
   build : (dir, opts) ->
-    @process dir
     for route, opts of @routes
       source = opts.source
       locals = @locals
       locals = @extendLocals(opts.locals) if opts.locals
-      console.log "building #{route} with "
-      console.log locals
-      @compile source, route, locals
+      log.notice "building user-defined route #{route}"
+      fullPath = path.resolve(process.cwd() + route)
+      @compile source, locals, {outputFile: fullPath}
+
+    @process dir
 
   #Ignore an array of various directory names
   ignore : (types) ->
     @ignored = types
 
 
-  #Compiles a file and writes it out to disk
-  compile : (file, locals) ->
+  #  Compiles a file and writes it out to disk
+  #  `file` is the absolute path to the input file
+  #  `locals` is an object of dynamic variables available
+  #    to the view template.
+  #  `options` accepts the following
+  #   {
+  #     outputFile : The destination file to output to
+  #   }
+  compile : (file, locals, options) ->
     locals = locals || @locals
-    result = @compileFile file, locals, (result) =>
+    result = @compileFile file, locals, options, (result) =>
       # Convert to relative output for ease of reading
-      relInput = pathfs.relative(process.cwd(), file)
-      relOutput = pathfs.relative(process.cwd(), result.outputFile)
+      relInput = path.relative(process.cwd(), file)
+      relOutput = path.relative(process.cwd(), result.outputFile)
       if result.exists
         log.notice "up to date #{relOutput} from #{relInput}"
       else
@@ -161,19 +170,21 @@ class Giles
       fs.writeFileSync result.outputFile, result.content, 'utf8'
 
   #Compiles a file and calls cb() with the result object
-  compileFile : (file, locals, cb) ->
+  compileFile : (file, locals, options, cb) ->
     [prefix, ext] = @parseFileName(file)
     compiler = @compilerMap[ext]
     return unless compiler
 
-    unless pathfs.existsSync(file)
+    unless path.existsSync(file)
       console.error "Could not find source file #{file}"
       return
     outputFile = prefix+compiler.extension
+    if options?.outputFile
+      outputFile = options.outputFile
     content = fs.readFileSync(file, 'utf8')
 
     outputContent = null
-    if pathfs.existsSync(outputFile)
+    if path.existsSync(outputFile)
       outputContent = fs.readFileSync(outputFile, 'utf8')
 
     cwd = process.cwd()
@@ -202,7 +213,7 @@ class Giles
 
   # Get the prefix and extension for a filename
   parseFileName : (file) ->
-    ext = pathfs.extname(file)
+    ext = path.extname(file)
     base = file.substr(0,file.length - ext.length)
     [base, ext]
 
