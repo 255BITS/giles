@@ -90,9 +90,9 @@ _It is imperative that you place this before `connect.static'_
 
 #Changelog
 ### v0.5.0
-  *Added -s option which tells giles to start a webserver on port 2255
-  *Added -p option to specify port of -s
-  *Removed -w option, -s works better and more consistently
+* Added -s option which tells giles to start a webserver on port 2255
+* Added -p option to specify port of -s
+* Removed -w option, -s works better and more consistently
 
 ###License
   Giles is available under the MIT license.  We hope you find it useful.  Please let us at 255 BITS know if you use it 
