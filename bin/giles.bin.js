@@ -9,9 +9,9 @@ commander.
 //  option('-o, --output-dir <dir>', 'The output directory').
   option('-i, --ignore <dir-list>', 'A comma delimited list of directories to ignore').
 //  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
-  option('-w, --watch', 'Watches the existing and new files for changes.  For development mode.').
   option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.').
-  option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999');
+  option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999').
+  option('-p, --port <port>', 'Port to run with giles -s.');
 
 commander.parse(process.argv);
 
@@ -19,16 +19,16 @@ var args = commander.args;
 
 var cwd = process.cwd();
 if(args.length === 0) {
-  if(commander.watch)
-    log.log("No arguments(see --help), watching: "+cwd)
-  else
-    log.log("No arguments(see --help), building(-w to watch, -s to serve): "+cwd)
+  log.log("No arguments(see --help), building(-w to watch, -s to serve): "+cwd)
   args = [cwd];
 }
 
 args.forEach(function(dir) {
   dir = pathfs.resolve(cwd, dir);
   var opts = {};
+  if(commander.port) {
+    opts.port = commander.port;
+  }
   if(commander.ignore) {
     var args = commander.ignore.split(',');
     var map = [], i=0, len=args.length;
@@ -59,8 +59,6 @@ args.forEach(function(dir) {
   giles.locals.cwd = dir;
   if(commander.server) {
     giles.server(dir, opts);
-  } else if(commander.watch) {
-    giles.watch(dir, opts);
   } else {
     giles.build(dir, opts);
   }

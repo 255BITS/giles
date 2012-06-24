@@ -9,7 +9,10 @@ module.exports =
   info: (message, more...) ->
     console.log(clc.cyan.bold("[INFO  ] ", more)+message)
   log: (message, more...) ->
-    console.log(message, more)
+    if more.length > 0 
+      console.log(message, more)
+    else
+      console.log message
   encourage: () ->
     console.log(clc.blue("  That's quite good, what you've done."))
 

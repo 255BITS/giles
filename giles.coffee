@@ -8,37 +8,44 @@ class Giles
     @compilerMap = {}
     @reverseCompilerMap = {}
     @ignored = []
+    @locals = {}
 
-  server : (dir, opts) ->
-    @app = connect().use((req, res, next) =>
+  #the connect module for giles, to use it do
+  #express.use(giles.connect(assetDirectory))
+  connect : (dir) =>
+    (req, res, next) =>
       [requestedFile,args] = (dir+req.url).split("?")
       file = @reverseLookup(requestedFile)
       if(file)
         log.log("Compiling: " + file)
-        @compile(file)
-        next()
+        @compileFile file, @locals, (result) ->
+          res.end result.content
       else
         next()
-    ).use(connect.static(dir)).listen(2255)
-    log.log("Giles is watching on port 2255 ")
+
+  server : (dir, opts) ->
+    port = opts['port'] || 2255
+    @app = connect().use(@connect(dir)).use(connect.static(dir)).listen(port)
+    log.log("Giles is watching on port "+port)
 
   reverseLookup : (file) ->
-    [all, name, ext] = file.match(/(.*)\.(\w+)/)
+    [name, ext] = @parseFileName(file)
     ext = "."+ext
+    pwd = pathfs.resolve(".")
+    relativeName = pathfs.relative(pwd, name)
 
     numberFound = 0
+    foundFile = null
     if @reverseCompilerMap[ext]
       for extension in @reverseCompilerMap[ext] 
         if(pathfs.existsSync(name+extension))
-          newExt = extension 
+          foundFile = name+extension
           numberFound += 1
     
     if numberFound > 1
       throw "You can only have one file that can compile into #{file} - you have #{numberFound} - #{@reverseCompilerMap[ext]}"
-    else if numberFound == 0
-      return null
 
-    foundFile = name+newExt
+    return foundFile
 
   #Crawls a directory recursively
   #calls onDirectory for every directory encountered
@@ -68,31 +75,6 @@ class Giles
           path=dir+'/'+file
           fs.stat path, handlePath(path)
 
-  #Watches a directory recursively
-  watch : (dir, opts) ->
-    onDirectory = (dir) =>
-      return if @isIgnored(dir)
-      fs.watch dir, {persistent:true}, (event, file) =>
-        path = dir+'/'+file
-        fs.stat path, (err, stats) =>
-          if err
-            log.error(err)
-          else if stats.isDirectory()
-            onDirectory(path)
-          else if stats.isFile()
-            @buildFile(path)
-          else
-            #wtf are we dealing with.  A device?!
-            log.error("Could not determine file "+filename)
-            log.error(stats)
-
-    #if 'dir' is a file, we watch it
-    ifFile = () =>
-      fs.watchFile dir, {persistent:true, interval: 50}, () =>
-        @compile(dir)
-
-    @process dir, onDirectory, ifFile
-    
   #Adds a compiler.  See README.md for usage
   addCompiler : (extensions, target, callback) ->
     compiler = 
@@ -134,19 +116,29 @@ class Giles
 
 
   #Compiles a file and writes it out to disk
-  compile : (file) ->
-    result = @compileFile file, (result) ->
+  compile : (file, locals) ->
+    locals = locals || @locals
+    result = @compileFile file, locals, (result) =>
+      # Convert to relative output for ease of reading
+      relInput = pathfs.relative(process.cwd(), file)
+      relOutput = pathfs.relative(process.cwd(), result.outputFile)
+      if result.exists
+        log.notice "up to date #{relOutput} from #{relInput}"
+      else
+        log.notice "compiled #{relInput} into #{relOutput}"
+        log.encourage()
       return unless result
       fs.writeFileSync result.outputFile, result.content, 'utf8'
-      log.encourage()
 
   #Compiles a file and calls cb() with the result object
-  compileFile : (file, cb) ->
+  compileFile : (file, locals, cb) ->
     [prefix, ext] = @parseFileName(file)
     compiler = @compilerMap[ext]
     return unless compiler
 
-    return unless pathfs.existsSync(file)
+    unless pathfs.existsSync(file)
+      console.error "Could not find source file #{file}"
+      return
     outputFile = prefix+compiler.extension
     content = fs.readFileSync(file, 'utf8')
 
@@ -156,22 +148,22 @@ class Giles
 
     cwd = process.cwd()
     try
-      compiler.callback content, file, @locals, (output) ->
+      compiler.callback content, file, locals, (output) ->
         if output == outputContent
-          return
-
-        #Output the relative file name in respect
-        #to the user's current directory
-        relFile = file.replace(cwd, ".")
-        relOutputFile = file.replace(cwd, ".")
-        log.notice('compiled ' +relFile+ ' to ' + relOutputFile)
-
-        cb( 
-          outputFile : outputFile,
-          content : output,
-          inputFile : file,
-          originalContent : content
-        )
+          cb({
+            content: outputContent, 
+            outputFile : outputFile,
+            inputFile : file,
+            originalContent : content,
+            exists: true
+          })
+        else
+          cb({ 
+            outputFile : outputFile,
+            content : output,
+            inputFile : file,
+            originalContent : content
+          })
     catch error
       log.error(error)
       log.error("stack trace:")
@@ -180,11 +172,9 @@ class Giles
 
   # Get the prefix and extension for a filename
   parseFileName : (file) ->
-    index = file.lastIndexOf '.'
-    if index == -1
-      [file, '']
-    else
-      [file.substr(0,index), file.substr(index)]
+    ext = pathfs.extname(file)
+    base = file.substr(0,file.length - ext.length)
+    [base, ext]
 
   # true if name contains an ignored directory
   isIgnored : (name) ->
@@ -197,7 +187,6 @@ class Giles
 
 #create our export singleton to set up default values
 giles = new Giles()
-giles.locals = {}
 
 #Stylus compiler.  Nothing fancy
 giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, options, output) ->
@@ -231,7 +220,8 @@ giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
   compileOpts = {}
   compileOpts.filename = filename
   compileOpts.pretty = true if options.development
-  output(jade.compile(contents, compileOpts)(options))
+  compiled = jade.compile(contents, compileOpts)(options)
+  output(compiled)
 
 #default ignores, may be overriden
 giles.ignore [/node_modules/, /.git/]
