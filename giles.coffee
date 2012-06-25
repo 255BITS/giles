@@ -41,6 +41,13 @@ class Giles
 
       if(file)
         @compileFile file, locals, {}, (result) ->
+          relInput = path.relative(process.cwd(), file)
+          relOutput = path.relative(process.cwd(), result.outputFile)
+          if result.exists
+            log.notice "up to date #{relOutput} from #{relInput}"
+          else
+            log.notice "compiled #{relInput} into #{relOutput}"
+            log.encourage()
           res.end result.content
       else
         next()
