@@ -52,11 +52,15 @@ _ignore defaults to node_modules,.git_
 These examples are in coffeescript.
 
 ### Building with .js and giles (works with Jake or Cake)
-    srcDir = PATH_TO_SOURCE
-    options = {}
-    
-    giles = require('giles')
-    giles.build(srcDir, options)
+
+```coffeescript
+srcDir = PATH_TO_SOURCE
+options = {}
+
+giles = require('giles')
+giles.build(srcDir, options)
+```
+
 <!--
 ### To watch with giles 
     srcDir = PATH_TO_SOURCE
@@ -67,8 +71,11 @@ These examples are in coffeescript.
 -->
 
 ### To run the giles server
-    giles = require('giles')
-    giles.server(dir, {port : 12345})
+
+```coffeescript
+giles = require('giles')
+giles.server(dir, {port : 12345})
+```
 
 _Try it for a lightweight development mode_
 
