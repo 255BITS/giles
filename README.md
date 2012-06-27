@@ -108,7 +108,7 @@ to generate a dynamic page that is built into a finite amount of static targets.
 #This generates static files with the output file dynamicPage.html
 #locals is a list of variables available
 #to the .jade file when running this action
-locals = { name : "Martyn"}
+locals = {name : "Martyn"}
 
 giles.get '/dynamicPage.html', 'page.jade', locals
 ```
