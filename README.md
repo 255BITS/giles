@@ -54,13 +54,13 @@ _This compiles to the same directory as the asset._
 giles --ignore vendor,bin
 ```
 
-###To start a webserver on port 2255
-```bash
-giles -s [-p 2255]
-```
-
 _ignore defaults to node_modules,.git_
 
+###To start a webserver on port 9000
+```bash
+giles -s -p 9000
+```
+_-p is optional, and will default to 2255 if not specified_
 
 #API
 These examples are in coffeescript.
