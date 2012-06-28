@@ -38,25 +38,22 @@ args.forEach(function(dir) {
     log.log('ignoring ' + map);
     giles.ignore(map);
   }
-  if(commander.environment) {
-    if(commander.environment == 'dev' || commander.environment == 'development') {
-      giles.locals['environment']='development';
-      giles.locals['development']=true;
-      giles.locals['production']=false;
-      log.log("Environment set to development");
-    } else if(commander.environment == 'prod' || commander.environment == 'production') {
-      giles.locals['environment']='production';
-      giles.locals['development']=false;
-      giles.locals['production']=true;
-      log.log("Environment set to production.")
-    }
-  } else {
-    log.log("Defaulting to 'development' environment.  Use -e prod for production.");
-    giles.locals['environment']='development';
-    giles.locals['production']=false;
-    giles.locals['development']=true;
+
+  if(commander.environment == 'dev') {
+    commander.environment = "development";
   }
+  if(commander.environment == 'prod') {
+    commander.environment = "production";
+  }
+  if(commander.environment == null) {
+    commander.environment = "development";
+  }
+  
+  log.log("Environment set to "+commander.environment);
+  giles.locals['environment']=commander.environment;
+  giles.locals[commander.environment]=true;
   giles.locals.cwd = dir;
+
   if(commander.server) {
     giles.server(dir, opts);
   } else {

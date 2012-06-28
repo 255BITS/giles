@@ -62,6 +62,22 @@ giles -s -p 9000
 ```
 _-p is optional, and will default to 2255 if not specified_
 
+###Environments are now supported.
+Environments are shortcuts that allow you to treat compilations differently.  The built-in enviroments are dev and prod .
+_giles defaults to development if nothing is specified._
+
+```giles <dir> -e prod
+```
+Compile assets in <directory> in production mode.
+Jade assets (and all compiled types that support local variables) can contain tests for the environment:
+```- if(production)
+  <div>Prod only content</div>
+```
+    or
+```- if(environment == 'production')
+  <div>Prod only content</div>
+```
+
 #API
 These examples are in coffeescript.
 
@@ -97,6 +113,8 @@ _Try it for a lightweight development mode_
 ```coffeescript
 connect.use(giles.connect(srcDir))
 ```
+
+This connector will compile supported file types (index.jade will be compiled when index.html is requested).  It does not serve any files.
 
 _It is imperative that you place this before `connect.static'_
   
@@ -143,6 +161,11 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
 #Changelog
+
+### v0.5.1
+* Added -e flag for environments
+* Documentation slightly updated
+
 ### v0.5.0
 * Added `giles.get("/route", sourceFile, locals)` for defining generated files
 * Added -s option which tells giles to start a webserver on port 2255
