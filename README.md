@@ -66,15 +66,22 @@ _-p is optional, and will default to 2255 if not specified_
 Environments are shortcuts that allow you to treat compilations differently.  The built-in enviroments are dev and prod .
 _giles defaults to development if nothing is specified._
 
-```giles <dir> -e prod
 ```
+giles <dir> -e prod
+```
+
 Compile assets in <directory> in production mode.
 Jade assets (and all compiled types that support local variables) can contain tests for the environment:
-```- if(production)
+
+```jade
+- if(production)
   <div>Prod only content</div>
 ```
-    or
-```- if(environment == 'production')
+
+or
+
+```jade
+- if(environment == 'production')
   <div>Prod only content</div>
 ```
 
