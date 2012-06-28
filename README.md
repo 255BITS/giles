@@ -75,14 +75,14 @@ Jade assets (and all compiled types that support local variables) can contain te
 
 ```jade
 - if(production)
-  <div>Prod only content</div>
+  #prodOnly content
 ```
 
 or
 
 ```jade
 - if(environment == 'production')
-  <div>Prod only content</div>
+  #prodOnly content
 ```
 
 #API
