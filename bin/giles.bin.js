@@ -3,6 +3,7 @@ var commander = require('commander');
 var giles = require('../giles');
 var log = require('../log')
 var pathfs = require('path');
+var fs = require('fs');
 
 commander.
   usage('[directory] [options]').
@@ -11,6 +12,7 @@ commander.
 //  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
   option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.').
   option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999').
+  option('-v, --versionOut', 'Outputs version number').
   option('-p, --port <port>', 'Port to run with giles -s.');
 
 commander.parse(process.argv);
@@ -18,6 +20,13 @@ commander.parse(process.argv);
 var args = commander.args;
 
 var cwd = process.cwd();
+
+if(commander.versionOut) {
+  var package = JSON.parse(fs.readFileSync(__dirname+'/../package.json'));
+  console.log(package.version);
+  return;
+}
+
 if(args.length === 0) {
   log.log("No arguments(see --help), building(-w to watch, -s to serve): "+cwd)
   args = [cwd];
