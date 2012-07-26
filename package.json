@@ -28,7 +28,8 @@
     "jade": "latest",
     "cli-color": "latest",
     "iced-coffee-script": "latest",
-    "connect" : "latest"
+    "connect" : "latest",
+    "markdown-js" : "latest"
   },
   "devDependencies":{
     "mocha" : "latest",

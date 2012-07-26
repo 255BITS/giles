@@ -231,7 +231,7 @@ class Giles
     return false
 
 
-[stylus, coffee, iced, jade] = []
+[stylus, coffee, iced, jade, markdown] = []
 
 #create our export singleton to set up default values
 giles = new Giles()
@@ -258,9 +258,10 @@ giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, outpu
   output(coffee.compile(contents, options))
 
 #iced-coffeescript compiler
-giles.addCompiler '.iced', '.js', (contents, filename, output) ->
+giles.addCompiler '.iced', '.js', (contents, filename, options, output) ->
   iced = require 'iced-coffee-script' unless iced
-  output(iced.compile(contents, options))
+  iced_output = iced.compile(contents, options)
+  output(iced_output)
 
 #jade compiler
 giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
@@ -270,6 +271,13 @@ giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
   compileOpts.pretty = true if options.development
   compiled = jade.compile(contents, compileOpts)(options)
   output(compiled)
+
+giles.addCompiler '.md', '.html', (contents, filename, options, output) ->
+   markdown = require("markdown-js")
+   html = markdown.encode(contents)
+   output(html)
+
+
 
 #default ignores, may be overriden
 giles.ignore [/node_modules/, /.git/]

@@ -15,14 +15,14 @@ describe 'giles', () ->
   
 describe 'new compiler', () ->
   it 'should compile correctly', () ->
-    giles.compileFile __dirname+'/test.test-giles-compiler', {}, (result) ->
+    giles.compileFile __dirname+'/test.test-giles-compiler', {}, {}, (result) ->
       result.content.should.equal result.originalContent.substr(0,5)
       result.outputFile.indexOf('test.test-giles-compiler-out').should.not.eql(-1)
       result.inputFile.indexOf('test.test-giles-compiler').should.not.eql(-1)
   
     giles.addCompiler ['.test-giles-compiler', '.test-giles-compiler2'], '.test-giles-compiler-out', (contents, filename, options, output) ->
       output(contents.substr(0,6))
-    giles.compileFile __dirname+'/test.test-giles-compiler', {}, (result) ->
+    giles.compileFile __dirname+'/test.test-giles-compiler', {}, {}, (result) ->
       result.content.should.equal result.originalContent.substr(0,6)
 
     giles.addCompiler '.test-giles-compiler', '.test-giles-compiler-out', (contents, filename, options, output) ->
@@ -34,12 +34,20 @@ describe 'building', () ->
     contents = fs.readFileSync(__dirname+'/test.test-giles-compiler-out', 'utf8')
     contents.length.should.equal(5)
 
-createFixture = (filename, content, done, callback)->
-  file = __dirname+"/"+filename
-  console.log('creating fixture: '+ file)
-  fs.writeFileSync(file, content, 'utf8')
-  setTimeout( () ->
-    callback()
-    fs.unlinkSync(file)
+
+describe 'locals', () ->
+  meta = null
+  before () ->
+    giles.addCompiler '.test-meta-data', '.test-meta-data-out', (contents, filename, options, output) ->
+      meta = options.giles
+      output ""
+    giles.get 'test2', 'test.test-meta-data', {}
+    giles.compile(__dirname+'/test.test-meta-data')
+
+  it 'should have environment meta data', (done) ->
+    meta.environment.should.equal('development')
     done()
-  , 100)
+
+  it 'should have route meta data', (done) ->
+    meta.allRoutes.length.should.equal(2)
+    meta.allRoutes[0].source.should.equal("test.test-meta-data")
