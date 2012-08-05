@@ -255,6 +255,7 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, options, ou
 #coffeescript compiler
 giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, output) ->
   coffee = require 'coffee-script' unless coffee
+  options.header = true
   output(coffee.compile(contents, options))
 
 #iced-coffeescript compiler
