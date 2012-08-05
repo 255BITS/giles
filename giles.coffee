@@ -256,6 +256,9 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, options, ou
 giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, output) ->
   coffee = require 'coffee-script' unless coffee
   options.header = true
+  options.bare = false
+  delete options.scope if options.scope # Fix scope setting on options that kills options.bare with repeat coffee compiling :(
+
   output(coffee.compile(contents, options))
 
 #iced-coffeescript compiler
