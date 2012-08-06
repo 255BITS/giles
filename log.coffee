@@ -14,6 +14,6 @@ module.exports =
     else
       console.log message
   encourage: () ->
-    array = ["  That's quite good, what you've done.", "  Thats correct - Keep Going.", "  You are quite good when you focus.", "  Well, I didn't quite expect you to do that well."]
+    array = ["  That's quite good, what you've done.", "  Thats correct - Keep Going.", "  You are quite good when you focus.", "  Well, I didn't quite expect you to do that well.", "They came after me, but I was more than a match for them."]
     console.log(clc.blue(array[Math.floor(Math.random() * array.length)]))
 
