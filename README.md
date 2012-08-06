@@ -168,6 +168,10 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
 #Changelog
+### v0.5.3
+* Added markdown
+* Fixed a bug in coffeescript generation
+
 ### v0.5.2
 * Added -v flag to output version number
 
