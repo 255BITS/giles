@@ -72,7 +72,7 @@ class Giles
     foundFile = null
     if @reverseCompilerMap[ext]
       for extension in @reverseCompilerMap[ext] 
-        if(path.existsSync(name+extension))
+        if(fs.existsSync(name+extension))
           foundFile = name+extension
           numberFound += 1
     
@@ -124,18 +124,35 @@ class Giles
       @reverseCompilerMap[target].push extensions
 
 
-  buildFile : (name) =>
-    @compile(name) unless @isIgnored(name)
-
-  process : (dir, ifFile) ->
+  process : (dir, onFile) ->
     stats = fs.statSync(dir)
     if stats.isDirectory()
-      @crawl dir, @buildFile
+      @crawl dir, onFile
     else if stats.isFile()
-      @compile(dir)
-      ifFile() if ifFile
+      onFile(dir)
     else
       log.error(dir + " is not a directory or file")
+
+  # Removes a specific file
+  rmFile : (file) ->
+    fs.unlink file, (err) -> 
+      log.error("Failed to remove: #{file}", err) if(err)
+
+  # Cleans up a directory's generated files.  See README.md for usage
+  clean: (dir, opts) ->
+    for route, opts of @routes
+      source = opts.source
+      fullPath = path.resolve(process.cwd() + route)
+      log.notice "cleaning #{fullPath}"
+      @rmFile(fullPath)
+
+    @process dir, (f) => 
+      # Assume: f is a .html file with a jade file.
+      # 1) Check if both the .jade file and the .html file exist
+      sourceFile = @reverseLookup(f)
+      if fs.existsSync(sourceFile)
+        log.notice("Cleaning: " + f)
+        @rmFile(f) 
 
   #Builds a directory.  See README.md for usage
   build : (dir, opts) ->
@@ -147,7 +164,7 @@ class Giles
       fullPath = path.resolve(process.cwd() + route)
       @compile source, locals, {outputFile: fullPath}
 
-    @process dir
+    @process dir, (f) => @compile(f)
 
   #Ignore an array of various directory names
   ignore : (types) ->
@@ -163,6 +180,7 @@ class Giles
   #     outputFile : The destination file to output to
   #   }
   compile : (file, locals, options) ->
+    return if @isIgnored(file)
     locals = locals || @locals
     result = @compileFile file, locals, options, (result) =>
       # Convert to relative output for ease of reading
@@ -182,7 +200,7 @@ class Giles
     compiler = @compilerMap[ext]
     return unless compiler
 
-    unless path.existsSync(file)
+    unless fs.existsSync(file)
       console.error "Could not find source file #{file}"
       return
     outputFile = prefix+compiler.extension
@@ -191,7 +209,7 @@ class Giles
     content = fs.readFileSync(file, 'utf8')
 
     outputContent = null
-    if path.existsSync(outputFile)
+    if fs.existsSync(outputFile)
       outputContent = fs.readFileSync(outputFile, 'utf8')
 
     cwd = process.cwd()
@@ -226,6 +244,7 @@ class Giles
 
   # true if name contains an ignored directory
   isIgnored : (name) ->
+    return true if /^_/.test(name.split('/')?[-1]) # ignore all files beginning with underscore
     for ignore in @ignored
       return true if ignore.test(name) #this matches really greedy
     return false

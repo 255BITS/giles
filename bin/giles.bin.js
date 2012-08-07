@@ -12,6 +12,7 @@ commander.
 //  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
   option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.').
   option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999').
+  option('-c, --clean', 'Clean up all the generated files').
   option('-v, --versionOut', 'Outputs version number').
   option('-p, --port <port>', 'Port to run with giles -s.');
 
@@ -28,7 +29,7 @@ if(commander.versionOut) {
 }
 
 if(args.length === 0) {
-  log.log("No arguments(see --help), building(-w to watch, -s to serve): "+cwd)
+  log.notice("No path specified.  That's quite alright, I'll use the current path: "+cwd);
   args = [cwd];
 }
 
@@ -58,13 +59,15 @@ args.forEach(function(dir) {
     commander.environment = "development";
   }
   
-  log.log("Environment set to "+commander.environment);
+  log.info("Environment set to "+commander.environment);
   giles.locals['environment']=commander.environment;
   giles.locals[commander.environment]=true;
   giles.locals.cwd = dir;
 
   if(commander.server) {
     giles.server(dir, opts);
+  } else if(commander.clean) {
+    giles.clean(dir, opts);
   } else {
     giles.build(dir, opts);
   }

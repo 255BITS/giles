@@ -31,12 +31,20 @@ giles
 
 _It will build every file into the same directory(views/index.jade will become views/index.html)_
 
+_Giles ignores files that begin with '_' (underscore).  Use these for mixins, partials and etc. _
+
 ###To get help 
 ```bash
 giles -h
 ```
 
 _If you ever need to run this, file a bug with me._
+
+### To clean up
+```bash
+giles -c
+```
+_This will remove all files where generation is possible - IE: it will remove layout.html if you have a layout.jade.  Be safe out there!_
 
 <!--
 ###To watch the current directory, recursively 
@@ -168,6 +176,9 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
 #Changelog
+### v0.5.4
+* Added giles -c (--clean)
+
 ### v0.5.3
 * Added markdown
 * Fixed a bug in coffeescript generation
