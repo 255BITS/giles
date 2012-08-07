@@ -244,7 +244,9 @@ class Giles
 
   # true if name contains an ignored directory
   isIgnored : (name) ->
-    return true if /^_/.test(name.split('/')?[-1]) # ignore all files beginning with underscore
+    filename = name.split('/')
+    filename = filename[filename.length-1]
+    return true if /^_/.test(filename) # ignore all files beginning with underscore
     for ignore in @ignored
       return true if ignore.test(name) #this matches really greedy
     return false
