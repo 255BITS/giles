@@ -14,7 +14,8 @@ commander.
   option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999').
   option('-c, --clean', 'Clean up all the generated files').
   option('-v, --versionOut', 'Outputs version number').
-  option('-p, --port <port>', 'Port to run with giles -s.');
+  option('-p, --port <port>', 'Port to run with giles -s.').
+  option('-q, --quiet', 'No output mode');
 
 commander.parse(process.argv);
 
@@ -26,6 +27,11 @@ if(commander.versionOut) {
   var package = JSON.parse(fs.readFileSync(__dirname+'/../package.json'));
   console.log(package.version);
   return;
+}
+
+if(commander.quiet) {
+  giles.quiet();
+  log.quiet();
 }
 
 if(args.length === 0) {

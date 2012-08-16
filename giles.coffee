@@ -52,6 +52,11 @@ class Giles
       else
         next()
 
+  # Tells giles to not output anything to the console
+  quiet : () ->
+    log.quiet(true)
+
+
   #adds an endpoint to the list of generated files
   get : (endpoint, source, locals) ->
     @routes[endpoint]={source: source, locals:locals}

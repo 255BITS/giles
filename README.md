@@ -176,6 +176,9 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
 #Changelog
+### v0.5.5
+* Added giles -q (--quiet)
+
 ### v0.5.4
 * Added giles -c (--clean)
 
