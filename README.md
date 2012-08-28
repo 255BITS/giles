@@ -7,7 +7,7 @@ nextgen web tools and increase project momentum.
 * [CoffeeScript](http://coffeescript.org/) - Incredible javascript compiler.  Everything just seems to work better with coffeescript. 
 * [Stylus](https://github.com/LearnBoost/stylus) - Fantastic css compiler.  The variable/mixin support is extremely powerful.
 * [Jade](http://jade-lang.com/) - Cool HAML-like alternative to writing html.
-* [Markdown](https://github.com/evilstreak/markdown-js) - Markdown is the most intuitive markup language ever invented, made by the people with the coolest domain ever registered [http://daringfireball.net/](http://daringfireball.net/)
+* [Markdown](http://daringfireball.net/projects/markdown/) - Markdown is the most intuitive markup language ever invented.
 * Your favorite language.  Add it and issue a pull request.
 
 ###Giles is a command line tool and API for:
