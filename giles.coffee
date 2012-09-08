@@ -48,6 +48,17 @@ class Giles
           else
             log.notice "compiled #{relInput} into #{relOutput}"
             log.encourage()
+
+          if(/.css/.test(relOutput))
+            #Sets MIME type for CSS stylesheets
+            res.setHeader "Content-Type", "text/css"
+          else if(/.html/.test(relOutput))
+            #Sets MIME type for HTML files
+            res.setHeader "Content-Type", "text/html"
+          else if(/.js/.test(relOutput))
+            #Sets MIME type for JavaScript files
+            res.setHeader "Content-Type", "application/javascript"
+
           res.end result.content
       else
         next()
