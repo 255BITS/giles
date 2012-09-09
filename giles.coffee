@@ -183,7 +183,7 @@ class Giles
 
     @process dir, (f) => @compile(f)
 
-  #Ignore an array of various directory names
+  # Ignore an array of various directory names
   ignore : (types) ->
     @ignored = types
 
