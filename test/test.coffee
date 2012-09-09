@@ -9,10 +9,46 @@ describe 'building', () ->
     contents.length.should.equal(5)
 
 describe 'connect', () ->
+  before () ->
+    giles.addCompiler '.test-connect', '.test-connect-out', (contents, filename, options, output) ->
+      output "spec response"
+
   #test that res is not passed on success
-  #test error conditions around 500, 404
+  it 'should send result', () -> 
+    connect = giles.connect(__dirname)
+    connect(req, res, next)
+    #TODO fill me in
+
+  #test error conditions around 500
+  it 'should output 500 error', () ->
+    giles.addCompiler '.test-500', '.test-500-out', (contents, filename, options, output) ->
+      throw "500 error"
+    #TODO fill me in
+
+  it 'should call next on 404', () ->
+    #time out error means giles.connect never called next
+    next = () ->
+      done()
+
+    connect = giles.connect(__dirname)
+    connect(req, res, next)
+
+    #TODO fill me in
+
   #test if url parms hose it up
+  it 'should ignore url params', () ->
+    url = "a?b"
+    # TODO fill me in
+
+
   #test mime header type
+  it 'should return valid mime type', () ->
+    #TODO fill me in
+    res.getHeader("Content-Type").should.eql "text/css"
+    #TODO fill me in
+    res.getHeader("Content-Type").should.eql "text/html"
+    #TODO fill me in
+    res.getHeader("Content-Type").should.eql "application/javascript"
 
 describe 'giles', () ->
   it 'should get extensions', () ->

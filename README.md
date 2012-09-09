@@ -177,6 +177,10 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
 #Changelog
+### v0.5.6
+* Added mocha specs around connect module
+* Merged issue with mime types from [mbarzda](https://github.com/mbarzda/giles/commit/0edd714339d4287e4ca2443b800b2d165098d6ca)
+
 ### v0.5.5
 * Added giles -q (--quiet)
 
