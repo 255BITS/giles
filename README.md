@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/255BITS/giles.png)](http://travis-ci.org/255BITS/giles)
 Giles wants you to stop writing HTML, CSS, and JS. 
 
 Giles is a static asset builder for a variety of useful markup languages.  Use Giles to develop with 
