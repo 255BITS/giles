@@ -48,14 +48,15 @@ class Giles
           else
             log.notice "compiled #{relInput} into #{relOutput}"
             log.encourage()
-
-          if(/.css/.test(relOutput))
+            
+          extname = path.extname(relOutput)
+          if extname == '.css'
             #Sets MIME type for CSS stylesheets
             res.setHeader "Content-Type", "text/css"
-          else if(/.html/.test(relOutput))
+          else if extname == '.html'
             #Sets MIME type for HTML files
             res.setHeader "Content-Type", "text/html"
-          else if(/.js/.test(relOutput))
+          else if extname == '.js'
             #Sets MIME type for JavaScript files
             res.setHeader "Content-Type", "application/javascript"
 
