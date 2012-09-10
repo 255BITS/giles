@@ -9,20 +9,37 @@ describe 'building', () ->
     contents.length.should.equal(5)
 
 describe 'connect', () ->
+  req = null
+  res = null
   before () ->
     giles.addCompiler '.test-connect', '.test-connect-out', (contents, filename, options, output) ->
       output "spec response"
+    #mock request
+    req = {
+      url : "/test.test-connect-out"
+    }
+    #mock response
+    res = {
+      setHeader : (a, b) ->
+        @headers[a] = b
+      getHeader : (a) ->
+        @headers[a]
+      end : (content) ->
+        @content = content
+    }
+    res.headers = {}
 
-  #test that res is not passed on success
+
+  #test that next is not called on success
   it 'should send result', () -> 
     connect = giles.connect(__dirname)
+    next = () -> "should not call next".should.eql("")
     connect(req, res, next)
-    #TODO fill me in
 
   #test error conditions around 500
   it 'should output 500 error', () ->
-    giles.addCompiler '.test-500', '.test-500-out', (contents, filename, options, output) ->
-      throw "500 error"
+    #giles.addCompiler '.test-500', '.test-500-out', (contents, filename, options, output) ->
+    #  throw "500 error"
     #TODO fill me in
 
   it 'should call next on 404', () ->
@@ -33,21 +50,38 @@ describe 'connect', () ->
     connect = giles.connect(__dirname)
     connect(req, res, next)
 
-    #TODO fill me in
 
   #test if url parms hose it up
   it 'should ignore url params', () ->
-    url = "a?b"
+    url = "/test.test-connect-out?b"
+    req.url = url
     # TODO fill me in
+    next = () ->
+      done()
 
+    connect = giles.connect(__dirname)
+    connect(req, res, next)
 
   #test mime header type
-  it 'should return valid mime type', () ->
-    #TODO fill me in
+  it 'should return css mime type', () ->
+    connect = giles.connect(__dirname)
+    next = null
+    req.url = "/test-content-type.css"
+    connect(req, res, next)
     res.getHeader("Content-Type").should.eql "text/css"
-    #TODO fill me in
+
+  it 'should return html mime type', () ->
+    connect = giles.connect(__dirname)
+    next = null
+    req.url = "/test-content-type.html"
+    connect(req, res, next)
     res.getHeader("Content-Type").should.eql "text/html"
-    #TODO fill me in
+
+  it 'should return js mime type', () ->
+    connect = giles.connect(__dirname)
+    next = null
+    req.url = "/test-content-type.js"
+    connect(req, res, next)
     res.getHeader("Content-Type").should.eql "application/javascript"
 
 describe 'giles', () ->
