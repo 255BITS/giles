@@ -71,23 +71,20 @@ giles -s -p 9000
 ```
 _-p is optional, and will default to 2255 if not specified_
 
-###Environments are now supported.
-Environments are shortcuts that allow you to treat compilations differently.  The built-in enviroments are dev and prod .
-_giles defaults to development if nothing is specified._
+###Environments
+    
+    Note the flag -e is deprecated in favor of the NODE_ENV environment variable.
+
+Environments are shortcuts that allow you to treat compilations differently. 
+_giles defaults to null if unspecified._
 
 ```
-giles <dir> -e prod
+NODE_ENV=production giles <dir>
 ```
 
 Compile assets in <directory> in production mode.
+
 Jade assets (and all compiled types that support local variables) can contain tests for the environment:
-
-```jade
-- if(production)
-  #prodOnly content
-```
-
-or
 
 ```jade
 - if(environment == 'production')

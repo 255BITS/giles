@@ -10,7 +10,7 @@ commander.
 //  option('-o, --output-dir <dir>', 'The output directory').
   option('-i, --ignore <dir-list>', 'A comma delimited list of directories to ignore').
 //  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
-  option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files.').
+  option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files (deprecated: use NODE_ENV environment variable).').
   option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999').
   option('-c, --clean', 'Clean up all the generated files').
   option('-v, --versionOut', 'Outputs version number').
@@ -55,16 +55,8 @@ args.forEach(function(dir) {
     giles.ignore(map);
   }
 
-  if(commander.environment == 'dev') {
-    commander.environment = "development";
-  }
-  if(commander.environment == 'prod') {
-    commander.environment = "production";
-  }
-  if(commander.environment == null) {
-    commander.environment = "development";
-  }
-  
+  environment = process.env.NODE_ENV || commander.environment;
+
   log.info("Environment set to "+commander.environment);
   giles.locals['environment']=commander.environment;
   giles.locals[commander.environment]=true;
