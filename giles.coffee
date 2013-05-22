@@ -310,9 +310,13 @@ giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
   jade = require 'jade' unless jade
   compileOpts = {}
   compileOpts.filename = filename
-  compileOpts.pretty = true if options.development
-  compiled = jade.compile(contents, compileOpts)(options)
-  output(compiled)
+  compileOpts.pretty = true
+
+  try
+    compiled = jade.compile(contents, compileOpts)(options)
+    output(compiled)
+  catch e
+    output("<h1>Error compiling #{filename}</h1><code><pre>#{e.message}#{e.stack}</pre></code>")
 
 giles.addCompiler '.md', '.html', (contents, filename, options, output) ->
    markdown = require("markdown-js")
