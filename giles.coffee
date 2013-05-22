@@ -317,6 +317,7 @@ giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
     output(compiled)
   catch e
     output("<h1>Error compiling #{filename}</h1><code><pre>#{e.message}#{e.stack}</pre></code>")
+    throw e
 
 giles.addCompiler '.md', '.html', (contents, filename, options, output) ->
    markdown = require("markdown-js")
