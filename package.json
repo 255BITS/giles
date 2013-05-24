@@ -1,6 +1,6 @@
 {
   "name": "giles",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "author": "Martyn Garcia <martyn.garcia@gmail.com>",
   "description": "a next-gen language watcher/compiler for pre-processed languages",
   "bin": {
@@ -22,18 +22,18 @@
     "server"
   ],
   "dependencies" : {
-    "commander": "latest",
-    "stylus": "latest",
-    "coffee-script": "latest",
-    "jade": "latest",
-    "cli-color": "latest",
-    "iced-coffee-script": "latest",
-    "connect" : "latest",
-    "markdown-js" : "latest"
+    "commander": "*",
+    "stylus": "*",
+    "coffee-script": "*",
+    "jade": "*",
+    "cli-color": "*",
+    "iced-coffee-script": "*",
+    "connect" : "*",
+    "markdown-js" : "*"
   },
   "devDependencies":{
-    "mocha" : "latest",
-    "should" : "latest"
+    "mocha" : "*",
+    "should" : "*"
   },
   "license":"MIT",
   "engine": {
