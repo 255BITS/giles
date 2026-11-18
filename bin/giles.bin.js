@@ -1,73 +1,43 @@
 #!/usr/bin/env node
-var commander = require('commander');
-var giles = require('../giles');
-var log = require('../log')
-var pathfs = require('path');
-var fs = require('fs');
+const { Command } = require('commander');
+const path = require('node:path');
 
-commander.
-  usage('[directory] [options]').
-//  option('-o, --output-dir <dir>', 'The output directory').
-  option('-i, --ignore <dir-list>', 'A comma delimited list of directories to ignore').
-//  option('-j, --json <json-config-file>','The json file which defines local variables for templates').
-  option('-e, --environment <dev|prod>', 'Sets the environment variable "development" or "production" to use in generated files (deprecated: use NODE_ENV environment variable).').
-  option('-s, --server', 'Start a server to serve your compiled jade/coffeescript/etc files - on port 3999').
-  option('-c, --clean', 'Clean up all the generated files').
-  option('-v, --versionOut', 'Outputs version number').
-  option('-p, --port <port>', 'Port to run with giles -s.').
-  option('-q, --quiet', 'No output mode');
+const giles = require('../dist/giles');
+const { version } = require('../package.json');
 
-commander.parse(process.argv);
+const program = new Command()
+  .usage('[directory] [options]')
+  .argument('[directories...]')
+  .option('-i, --ignore <dir-list>', 'A comma delimited list of directories to ignore')
+  .option('-e, --environment <dev|prod>', 'Template environment. Prefer the NODE_ENV variable.')
+  .option('-s, --server', 'Serve and compile assets on demand. The default port is 2255.')
+  .option('-c, --clean', 'Clean up the generated files')
+  .version(version, '-v, --versionOut', 'Output the version number')
+  .option('-p, --port <port>', 'Port for the development server')
+  .option('-q, --quiet', 'No output mode')
+  .parse();
 
-var args = commander.args;
+const options = program.opts();
+if (options.quiet) giles.quiet();
+if (options.ignore) giles.ignore(options.ignore.split(',').map(pattern => new RegExp(pattern)));
 
-var cwd = process.cwd();
-
-if(commander.versionOut) {
-  var package = JSON.parse(fs.readFileSync(__dirname+'/../package.json'));
-  console.log(package.version);
-  return;
+const environment = process.env.NODE_ENV || options.environment;
+if (environment) {
+  giles.locals.environment = environment;
+  giles.locals[environment] = true;
 }
 
-if(commander.quiet) {
-  giles.quiet();
-  log.quiet();
-}
-
-if(args.length === 0) {
-  log.notice("No path specified.  That's quite alright, I'll use the current path: "+cwd);
-  args = [cwd];
-}
-
-args.forEach(function(dir) {
-  dir = pathfs.resolve(cwd, dir);
-  var opts = {};
-  if(commander.port) {
-    opts.port = commander.port;
-  }
-  if(commander.ignore) {
-    var args = commander.ignore.split(',');
-    var map = [], i=0, len=args.length;
-    for(i=0;i<len;++i) {
-      map.push(new RegExp(args[i]));
-    }
-    log.log('ignoring ' + map);
-    giles.ignore(map);
-  }
-
-  environment = process.env.NODE_ENV || commander.environment;
-
-  log.info("Environment set to "+commander.environment);
-  giles.locals['environment']=commander.environment;
-  giles.locals[commander.environment]=true;
+const directories = program.args.length ? program.args : [process.cwd()];
+for (const directory of directories) {
+  const dir = path.resolve(directory);
+  const settings = { port: options.port };
   giles.locals.cwd = dir;
 
-  if(commander.server) {
-    giles.server(dir, opts);
-  } else if(commander.clean) {
-    giles.clean(dir, opts);
+  if (options.server) {
+    giles.server(dir, settings);
+  } else if (options.clean) {
+    giles.clean(dir, settings);
   } else {
-    giles.build(dir, opts);
+    giles.build(dir, settings);
   }
-});
-
+}

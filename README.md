@@ -20,10 +20,26 @@ functionality in the languages of their choice.
 ###To install run 
 
 ```bash
-sudo npm install -g giles
+npm install -g giles
 ```
 
 _npm is available by installing [nodejs](http://nodejs.org)_
+
+### Build and release from source
+
+The current source requires Node.js 22.14 or newer. To verify a checkout,
+run `npm ci` and `npm test`. The package builds its JavaScript entry points
+during `npm pack`, so an installed copy needs no local CoffeeScript hook.
+The `.jade` and `.pug` compilers use Pug. Legacy `!!!` and relative
+extensionless includes of existing `.jade` files are supported.
+
+The [release workflow](.github/workflows/publish.yml) tests the packed
+package on Node 22 and 24 on pull requests. A push to `master` publishes
+the tested archive when its version is absent from the npm registry.
+Use npm Trusted Publishing for repository `255BITS/giles`, workflow
+`publish.yml` and environment `npm`, with direct publishing enabled.
+The first successful publish must occur within two days of registering it.
+Use a new version in `package.json` and `package-lock.json` to release.
 
 ### To build static assets, recursively
 ```bash

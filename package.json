@@ -6,12 +6,16 @@
   "bin": {
     "giles": "bin/giles.bin.js"
   },
-  "main": "giles",
+  "main": "dist/giles.js",
+  "files": [
+    "bin/",
+    "dist/"
+  ],
   "repository": {
-    "type":"git",
-    "url":"git://github.com/255BITS/giles.git"
+    "type": "git",
+    "url": "git+https://github.com/255BITS/giles.git"
   },
-  "keywords" : [
+  "keywords": [
     "cli",
     "coffeescript",
     "stylus",
@@ -21,22 +25,24 @@
     "watcher",
     "server"
   ],
-  "dependencies" : {
-    "commander": "*",
-    "stylus": "*",
-    "coffee-script": "*",
-    "jade": "*",
-    "cli-color": "*",
-    "iced-coffee-script": "*",
-    "connect" : "*",
-    "markdown-js" : "*"
+  "scripts": {
+    "build": "coffee --compile --output dist giles.coffee log.coffee",
+    "prepack": "npm run build",
+    "test": "npm run build && node --test test/*.test.cjs"
   },
-  "devDependencies":{
-    "mocha" : "*",
-    "should" : "*"
+  "dependencies": {
+    "cli-color": "^2.0.4",
+    "coffeescript": "^2.7.1",
+    "commander": "^14.0.3",
+    "connect": "^3.7.0",
+    "iced-coffee-script": "^108.0.14",
+    "marked": "^18.2.1",
+    "pug": "^3.0.4",
+    "serve-static": "^2.2.1",
+    "stylus": "0.63.0"
   },
-  "license":"MIT",
-  "engine": {
-    "node": ">=0.6"
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.14.0"
   }
 }
