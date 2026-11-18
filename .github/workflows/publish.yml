@@ -1,0 +1,91 @@
+name: Test and publish Giles
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify the npm package (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.14.0", "24.22.1"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Pack and test a clean consumer installation
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          node scripts/smoke-package.cjs "$RUNNER_TEMP/giles-$(node -p "require('./package.json').version").tgz"
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == '24.22.1' && github.repository == '255BITS/giles' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          name: giles-npm
+          path: ${{ runner.temp }}/giles-*.tgz
+          if-no-files-found: error
+
+  publish:
+    name: Publish the tested npm package
+    if: github.repository == '255BITS/giles' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: giles-npm
+      cancel-in-progress: false
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/giles
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@v4
+        with:
+          name: giles-npm
+      - name: Publish a new version using npm Trusted Publishing
+        run: |
+          node --input-type=module <<'JS'
+          import { execFileSync } from 'node:child_process';
+          import { readdirSync } from 'node:fs';
+
+          const archives = readdirSync('.').filter(name => name.endsWith('.tgz'));
+          if (archives.length !== 1) throw new Error('Expected exactly one tested tarball');
+          const archive = archives[0];
+          const { name, version } = JSON.parse(execFileSync('tar', ['-xOf', archive, 'package/package.json'], { encoding: 'utf8' }));
+          if (name !== 'giles' || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version) || archive !== `giles-${version}.tgz`) {
+            throw new Error('Unexpected package identity');
+          }
+          const record = await fetch(`https://registry.npmjs.org/giles/${encodeURIComponent(version)}`, {
+            signal: AbortSignal.timeout(15_000),
+            redirect: 'error',
+          });
+          if (record.ok) {
+            const existing = await record.json();
+            if (existing.name !== name || existing.version !== version) {
+              throw new Error('Registry response does not identify the tested package');
+            }
+            console.log(`${name}@${version} is already published`);
+          } else if (record.status === 404) {
+            const tag = version.includes('-') ? 'next' : 'latest';
+            execFileSync('npm', ['publish', `./${archive}`, '--ignore-scripts', '--access', 'public', '--tag', tag], { stdio: 'inherit' });
+          } else {
+            throw new Error(`Registry returned HTTP ${record.status}`);
+          }
+          JS

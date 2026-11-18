@@ -2,6 +2,11 @@ fs = require 'fs'
 path = require 'path'
 log = require './log'
 connect = require 'connect'
+serveStatic = require 'serve-static'
+
+within = (root, file) ->
+  relative = path.relative(root, file)
+  not path.isAbsolute(relative) and relative.split(path.sep)[0] isnt '..'
 
 class Giles 
   constructor : () ->
@@ -23,8 +28,9 @@ class Giles
   #the connect module for giles, to use it do
   #express.use(giles.connect(assetDirectory))
   connect : (dir) =>
+    root = fs.realpathSync(dir)
     (req, res, next) =>
-      [route, args] = req.url.split('?')
+      [route] = req.url.split('?')
       locals = @locals
       route = '/index.html' if(route == '/')
 
@@ -36,8 +42,13 @@ class Giles
         locals = @extendLocals(dynLocals) if dynLocals
       else
         #Otherwise look for 1-1 file mappings
-        [fullFilePath,args] = (dir+route).split("?")
-        file = @reverseLookup(fullFilePath)
+        try
+          fullFilePath = path.resolve(root, '.' + decodeURIComponent(route))
+          return next() unless within(root, fullFilePath)
+          file = @reverseLookup(fullFilePath)
+          return next() if file and not within(root, fs.realpathSync(file))
+        catch error
+          return next(error)
 
       if(file)
         @compileFile file, locals, {}, (result) ->
@@ -73,12 +84,13 @@ class Giles
   get : (endpoint, source, locals) ->
     @routes[endpoint]={source: source, locals:locals}
 
-  server : (dir, opts) ->
-    port = opts['port'] || 2255
-    @app = connect().use(@connect(dir))
-      .use(connect.static(dir))
+  server : (dir, opts = {}) ->
+    port = Number(opts.port ? 2255)
+    @app = connect().use(@connect(path.resolve(dir)))
+      .use(serveStatic(dir))
       .listen(port)
     log.notice("Giles is watching on port "+port)
+    return @app
 
   reverseLookup : (file) ->
     [name, ext] = @parseFileName(file)
@@ -167,7 +179,7 @@ class Giles
       # Assume: f is a .html file with a jade file.
       # 1) Check if both the .jade file and the .html file exist
       sourceFile = @reverseLookup(f)
-      if fs.existsSync(sourceFile)
+      if sourceFile and fs.existsSync(sourceFile)
         log.notice("Cleaning: " + f)
         @rmFile(f) 
 
@@ -231,7 +243,7 @@ class Giles
 
     cwd = process.cwd()
     try
-      compiler.callback content, file, locals, (output) ->
+      complete = (output) ->
         if output == outputContent
           cb({
             content: outputContent, 
@@ -247,6 +259,10 @@ class Giles
             inputFile : file,
             originalContent : content
           })
+      if compiler.callback.length is 3
+        compiler.callback content, file, complete
+      else
+        compiler.callback content, file, locals, complete
     catch error
       log.error(error)
       log.error("stack trace:")
@@ -269,7 +285,7 @@ class Giles
     return false
 
 
-[stylus, coffee, iced, jade, markdown] = []
+[stylus, coffee, iced, pug, marked] = []
 
 #create our export singleton to set up default values
 giles = new Giles()
@@ -279,11 +295,11 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, options, ou
   stylus = require 'stylus' unless stylus
   styl = stylus(contents)
   styl.set('filename', filename)
-  styl.include(options.cwd)
+  styl.include(options.cwd) if options.cwd
   for key, val in options
     styl.define(key, val)
 
-  stylus.render contents, {filename: filename}, (err, css) ->
+  styl.render (err, css) ->
     if err
       log.error "Could not render stylus file: "+filename
       log.error err
@@ -292,12 +308,10 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, options, ou
 
 #coffeescript compiler
 giles.addCompiler ['.coffee', '.cs'], '.js', (contents, filename, options, output) ->
-  coffee = require 'coffee-script' unless coffee
-  options.header = true
-  options.bare = false
-  delete options.scope if options.scope # Fix scope setting on options that kills options.bare with repeat coffee compiling :(
-
-  output(coffee.compile(contents, options))
+  coffee = require 'coffeescript' unless coffee
+  compilerOptions = Object.assign({}, options, header: true, bare: false)
+  delete compilerOptions.scope
+  output(coffee.compile(contents, compilerOptions))
 
 #iced-coffeescript compiler
 giles.addCompiler '.iced', '.js', (contents, filename, options, output) ->
@@ -306,23 +320,35 @@ giles.addCompiler '.iced', '.js', (contents, filename, options, output) ->
   output(iced_output)
 
 #jade compiler
-giles.addCompiler '.jade', '.html',  (contents, filename, options, output) ->
-  jade = require 'jade' unless jade
+legacyJade = {
+  preLex: (source, options) ->
+    return source unless path.extname(options.filename) is '.jade'
+    source.replace(/^([ \t]*)!!!(?:[ \t]+5)?[ \t]*$/gm, '$1doctype html')
+  postLex: (tokens, options) ->
+    if path.extname(options.filename) is '.jade'
+      for token in tokens when token.type is 'path' and not path.extname(token.val)
+        resolved = path.resolve(path.dirname(options.filename), token.val + '.jade')
+        token.val += '.jade' if not path.isAbsolute(token.val) and fs.existsSync(resolved)
+    tokens
+}
+
+giles.addCompiler ['.jade', '.pug'], '.html', (contents, filename, options, output) ->
+  pug = require 'pug' unless pug
   compileOpts = {}
   compileOpts.filename = filename
   compileOpts.pretty = true
+  compileOpts.plugins = [legacyJade]
 
   try
-    compiled = jade.compile(contents, compileOpts)(options)
+    compiled = pug.compile(contents, compileOpts)(options)
     output(compiled)
   catch e
     output("<h1>Error compiling #{filename}</h1><code><pre>#{e.message}#{e.stack}</pre></code>")
     throw e
 
 giles.addCompiler '.md', '.html', (contents, filename, options, output) ->
-   markdown = require("markdown-js")
-   html = markdown.encode(contents)
-   output(html)
+  marked = require('marked') unless marked
+  output(marked.parse(contents))
 
 
 
