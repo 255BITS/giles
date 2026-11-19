@@ -189,7 +189,15 @@ giles.addCompiler [".styl", ".stylus"], '.css', (contents, filename, output) ->
 
 **Both of these compilers are already in giles and listed here for illustration purposes.**
 
-#Changelog
+# Changelog
+
+### v0.6.0
+
+- The npm package ships working compiled entry points for the CLI and API.
+- The release uses Node.js 22.14 or later.
+- The development server serves compiled and static assets. Jade and Pug use the current Pug compiler.
+- The release workflow tests clean installs on Node 22 and 24 before publishing the archive.
+
 ### v0.5.6
 * Added mocha specs around connect module
 * Merged issue with mime types from [mbarzda](https://github.com/mbarzda/giles/commit/0edd714339d4287e4ca2443b800b2d165098d6ca)

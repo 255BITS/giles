@@ -63,7 +63,9 @@ jobs:
         run: |
           node --input-type=module <<'JS'
           import { execFileSync } from 'node:child_process';
-          import { readdirSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          import { readdirSync, readFileSync } from 'node:fs';
+          import { setTimeout as delay } from 'node:timers/promises';
 
           const archives = readdirSync('.').filter(name => name.endsWith('.tgz'));
           if (archives.length !== 1) throw new Error('Expected exactly one tested tarball');
@@ -72,20 +74,26 @@ jobs:
           if (name !== 'giles' || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version) || archive !== `giles-${version}.tgz`) {
             throw new Error('Unexpected package identity');
           }
-          const record = await fetch(`https://registry.npmjs.org/giles/${encodeURIComponent(version)}`, {
+          const integrity = `sha512-${createHash('sha512').update(readFileSync(archive)).digest('base64')}`;
+          const url = `https://registry.npmjs.org/giles/${encodeURIComponent(version)}`;
+          const lookup = () => fetch(url, {
             signal: AbortSignal.timeout(15_000),
             redirect: 'error',
           });
-          if (record.ok) {
-            const existing = await record.json();
-            if (existing.name !== name || existing.version !== version) {
-              throw new Error('Registry response does not identify the tested package');
-            }
-            console.log(`${name}@${version} is already published`);
-          } else if (record.status === 404) {
+          let record = await lookup();
+          if (record.status === 404) {
             const tag = version.includes('-') ? 'next' : 'latest';
             execFileSync('npm', ['publish', `./${archive}`, '--ignore-scripts', '--access', 'public', '--tag', tag], { stdio: 'inherit' });
-          } else {
-            throw new Error(`Registry returned HTTP ${record.status}`);
+            for (const waitMs of [0, 2_000, 2_000, 2_000]) {
+              await delay(waitMs);
+              record = await lookup();
+              if (record.status !== 404) break;
+            }
           }
+          if (!record.ok) throw new Error(`Registry returned HTTP ${record.status}`);
+          const published = await record.json();
+          if (published.name !== name || published.version !== version || published.dist?.integrity !== integrity) {
+            throw new Error(`npm metadata for ${name}@${version} does not match the tested archive`);
+          }
+          console.log(`Verified the tested ${name}@${version} archive on npm`);
           JS
